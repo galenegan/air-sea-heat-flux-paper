@@ -1,10 +1,9 @@
 # Air-sea Heat Flux Observations from a Spotter Buoy
-This repo contains all code necessary to reproduce the results presented in "Air-sea Heat Flux Observations from a Spotter Buoy," 
-which has been submitted for publication by Galen Egan, Seth Zippel, and Pieter Smit. 
+This repo contains all code necessary to reproduce the results presented in "Air-sea Heat Flux Observations from a Spotter Buoy," which has been submitted for publication by Galen Egan, Seth Zippel, and Pieter Smit. 
 
 
 ## Interpreter Setup
-The code herein was executed using a Python 3.9.10 interpreter with package versions as specified in `requirements.txt`
+The code herein was executed using a Python 3.9.10 interpreter with package versions specified in `requirements.txt`
 
 ## Source Data
 The source dataset can be found at [this link](https://oregonstate.box.com/s/7sw3lkku63s3jxqrenzx7jjmnc1snprm). After
