@@ -3,6 +3,8 @@ import matplotlib.dates as mdates
 from matplotlib.gridspec import GridSpec
 import numpy as np
 import pandas as pd
+from src.utils import get_project_root
+from src.bulk_variables.bulk_models import get_train_val_test
 
 params = {
     "axes.labelsize": 16,
@@ -35,18 +37,13 @@ def set_lims(ax):
     ax.set_ylim(lower_lim, upper_lim)
 
 
-df = pd.read_csv("../../../data/vented_dataset.csv")
+project_root = get_project_root()
+data_path = f"{project_root}/data"
+df = pd.read_csv(f"{data_path}/final_flux_dataset.csv")
 df["time"] = pd.to_datetime(df["time"], utc=True)
-
-# Train test split by time
-train_idx = df.index[
-    (
-        (df["time"] < "2023-09-28 06:20:00+00:00")
-        | ((df["time"] > "2023-10-27 23:40:00+00:00") & (df["time"] < "2023-12-01 00:00:00+00:00"))
-    )
-]
-eval_idx = df.index[((df["time"] >= "2023-09-28 06:20:00+00:00") & (df["time"] <= "2023-10-27 23:40:00+00:00"))]
-test_idx = df.index[((df["time"] >= "2023-12-01 00:00:00+00:00") & ((df["time"] <= "2024-01-10 00:00:00+00:00")))]
+train_idx, val_idx, test_idx = get_train_val_test(df)
+df = df.loc[test_idx]
+df = df.loc[df["spot_id"] == "31085C"]  # Last remaining vented Spotter during test set
 
 # %%
 dflux = np.gradient(df["sensible_heat_flux_dc"].values, df["epoch"].values)
@@ -268,5 +265,5 @@ ax6.set_title("(f)")
 
 fig.set_size_inches(10, 16)
 fig.tight_layout(pad=1)
-plt.savefig("../../plots/bulk_fluxes.png", dpi=300)
+plt.savefig(f"{project_root}/plots/bulk_fluxes.png", dpi=300)
 plt.show()

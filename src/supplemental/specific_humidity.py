@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from src.python.coare3p5.meteo import qair
+from src.coare3p5.meteo import qair
+from src.utils import get_project_root
 
 params = {
     "axes.labelsize": 16,
@@ -25,10 +26,12 @@ def bias(x, y):
     return np.nanmean(x - y)
 
 
-df = pd.read_csv("../publication_data_windfix_avg_dudt/final_dataset.csv")
+project_root = get_project_root()
+data_path = f"{project_root}/data"
+df = pd.read_csv(f"{data_path}/training_dataset.csv")
 mask = df["time"] < "2023-12-01"
 
-qair_inner, partial_press_inner = qair(df["air_temperature"], df["atmospheric_pressure"], df["relative_humidity"])
+qair_inner, _ = qair(df["air_temperature"], df["atmospheric_pressure"], df["relative_humidity"])
 qair_outer = df["specific_humidity_surface"]
 solar_down = df["solar_down_24m"]
 
@@ -41,5 +44,5 @@ ax.set_xlabel(r"$q$ internal (g/kg)")
 ax.set_ylabel("$q$ atmospheric (g/kg)")
 fig.set_size_inches(7, 5)
 fig.tight_layout(pad=1)
-plt.savefig("supplemental/q.png", dpi=300)
+plt.savefig(f"{project_root}/plots/q_supplemental.png", dpi=300)
 plt.show()

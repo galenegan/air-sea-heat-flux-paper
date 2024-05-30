@@ -1,8 +1,8 @@
 import numpy as np
 import os
 import sys
-import python.coare3p5.meteo as meteo
-import python.coare3p5.util as util
+import src.coare3p5.meteo as meteo
+import src.coare3p5.util as util
 
 
 """

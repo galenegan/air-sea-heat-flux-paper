@@ -1,39 +1,25 @@
 import numpy as np
 import pandas as pd
-from src.python.coare3p5.coare35vn import coare35vn
-from scipy.signal import butter, filtfilt
-from scipy.ndimage import median_filter
+from src.coare3p5.coare35vn import coare35vn
+from src.utils import get_project_root
 
-data_path = "/Users/ea-gegan/Documents/gitrepos/asit-proxy-sensing23/src/python/scripts/analysis/publication_data_windfix_avg_dudt"
-spot_ids_vented = ["31081C", "31084C", "31085C"]
-df = pd.read_csv(f"{data_path}/spotter_bulk_flux_input_dataset_vented.csv")
-df = df.loc[df["spot_id"].isin(spot_ids_vented)]
+project_root = get_project_root()
+data_path = f"{project_root}/data"
+df = pd.read_csv(f"{data_path}/bulk_variable_dataset.csv")
 df["latent_heat_flux_spotter_coare"] = np.nan
 df["sensible_heat_flux_spotter_coare"] = np.nan
 df["ustar_spotter_coare"] = np.nan
-df["U_10m_mean"] = df[["U_10m_s22", "U_10m_im"]].mean(axis=1)
+# df["U_10m_mean"] = df[["U_10m_s22", "U_10m_im"]].mean(axis=1)
 
-# # # Filter
-# fs = 1 / (20 * 60)
-# fc = 1 / (720 * 60)
-# b, a = butter(2, fc / (fs / 2))
-# # Filtering per unit
-# df["tfilt"] = np.nan
-# df["qfilt"] = np.nan
-# for spot_id in spot_ids_vented:
-#     dfs = df.loc[df["spot_id"] == spot_id]
-#     dfs["estimated_air_temperature_nn"] = filtfilt(b, a, dfs["estimated_air_temperature_nn"])
-#     dfs["estimated_specific_humidity_nn"] = filtfilt(b, a, dfs["estimated_specific_humidity_nn"])
-#     df.loc[dfs.index] = dfs
 
 filenames = [
-    "final_dataset.csv",
-    "final_dataset_asit_u.csv",
-    "final_dataset_asit_t.csv",
-    "final_dataset_asit_q.csv",
-    "final_dataset_asit_q_asit_t.csv",
-    "final_dataset_asit_u_asit_t.csv",
-    "final_dataset_asit_u_asit_q.csv",
+    "final_flux_dataset.csv",
+    "final_flux_dataset_asit_u.csv",
+    "final_flux_dataset_asit_t.csv",
+    "final_flux_dataset_asit_q.csv",
+    "final_flux_dataset_asit_q_asit_t.csv",
+    "final_flux_dataset_asit_u_asit_t.csv",
+    "final_flux_dataset_asit_u_asit_q.csv",
 ]
 
 for filename in filenames:
@@ -87,4 +73,4 @@ for filename in filenames:
         df.loc[ii, "sensible_heat_flux_spotter_coare"] = out[0, 2]
         df.loc[ii, "latent_heat_flux_spotter_coare"] = out[0, 3]
 
-    df.to_csv(f"{data_path}/error_stats/{filename}", index=False)
+    df.to_csv(f"{data_path}/{filename}", index=False)

@@ -149,7 +149,7 @@ def psit_26(z_L):
     Computes the temperature structure function given z/L.
     """
     from numpy import exp, log, sqrt, arctan, asarray, copy
-    from python.coare3p5.util import find
+    from src.coare3p5.util import find
 
     zet = copy(asarray(z_L, dtype=float))  # conversion to ndarray float
     dzet = 0.35 * zet
@@ -173,7 +173,7 @@ def psiu_26(z_L):
     Computes velocity structure function given z/L
     """
     from numpy import exp, log, sqrt, arctan, min, asarray, copy
-    from python.coare3p5.util import find
+    from src.coare3p5.util import find
 
     zet = copy(asarray(z_L, dtype=float))  # conversion to ndarray float
     dzet = 0.35 * zet
@@ -201,7 +201,7 @@ def psiu_40(z_L):
     Computes velocity structure function given z/L
     """
     from numpy import exp, log, sqrt, arctan, min, asarray, copy
-    from python.coare3p5.util import find
+    from src.coare3p5.util import find
 
     zet = copy(asarray(z_L, dtype=float))  # conversion to ndarray float
     dzet = 0.35 * zet

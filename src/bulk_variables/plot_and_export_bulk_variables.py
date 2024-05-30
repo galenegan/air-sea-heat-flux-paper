@@ -46,6 +46,44 @@ df["inferred_solar_radiation"] = incoming_shortwave(df)
 df["estimated_air_temperature_nn"] = air_temperature_nn(df)
 df["estimated_specific_humidity_nn"] = specific_humidity_nn(df)
 
+# Exporting for bulk flux calculations
+# df.to_csv(f"{project_root}/data/bulk_variable_dataset.csv", index=False)
+
+# %% Semi-analytical air temperature
+dfplot = df.loc[full_idx]
+mae = np.nanmean(np.abs(dfplot["estimated_air_temperature"].values - dfplot["air_temperature_surface"].values))
+bias = np.nanmean(dfplot["estimated_air_temperature"].values - dfplot["air_temperature_surface"].values)
+one = np.linspace(dfplot["air_temperature_surface"].min(), dfplot["air_temperature_surface"].max(), 100)
+
+fig, ax = plt.subplots()
+ax.plot(
+    dfplot["estimated_air_temperature"].values,
+    dfplot["air_temperature_surface"].values,
+    "o",
+    color="#012749",
+    alpha=0.5,
+)
+ax.plot(
+    one,
+    one,
+    "-",
+    color="#9f1853",
+    linewidth=3,
+    label=f"MAE = {mae:.2f} " + r"$^\circ$C" + f", Bias = {bias:.2f} " + r"$^\circ$C",
+)
+ax.legend()
+ax.set_xlabel(r"Analytical $\tilde{T}_{\textrm{air}}$ $(^\circ C)$")
+ax.set_ylabel(r"ASIT $T_{\textrm{air}}$ $(^\circ C)$")
+ax.set_xlim(-6, 35)
+ax.set_ylim(-6, 35)
+ax.set_xticks(np.arange(-5, 36, 5))
+ax.set_yticks(np.arange(-5, 36, 5))
+fig.set_size_inches(7, 6)
+fig.tight_layout(pad=0.5)
+plt.rcParams.update(params)
+plt.savefig(f"{project_root}/plots/tair_analytical.png", dpi=300)
+plt.show()
+
 # %% Plotting
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 
