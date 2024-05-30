@@ -2,7 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from src.utils import get_project_root
-from src.bulk_variables.bulk_models import get_train_val_test, incoming_shortwave, air_temperature_nn, specific_humidity_nn
+from src.bulk_variables.bulk_models import (
+    get_train_val_test,
+    incoming_shortwave,
+    air_temperature_nn,
+    specific_humidity_nn,
+)
 
 params = {
     "axes.labelsize": 16,
@@ -25,6 +30,7 @@ def mae(x, y):
 def bias(x, y):
     return np.nanmean(x - y)
 
+
 project_root = get_project_root()
 df = pd.read_csv(f"{project_root}/data/training_dataset.csv")
 spot_ids_vented = ["31081C", "31084C", "31085C"]
@@ -35,7 +41,7 @@ df = df.reset_index(drop=True)
 train_idx, val_idx, test_idx = get_train_val_test(df)
 full_idx = train_idx.union(val_idx.union(test_idx))
 
-#%% Estimating the bulk variables
+# %% Estimating the bulk variables
 df["inferred_solar_radiation"] = incoming_shortwave(df)
 df["estimated_air_temperature_nn"] = air_temperature_nn(df)
 df["estimated_specific_humidity_nn"] = specific_humidity_nn(df)

@@ -12,10 +12,11 @@ spot_ids_vented = ["31081C", "31084C", "31085C"]
 data_path = f"{project_root}/data"
 df_full = pd.read_csv(f"{data_path}/training_dataset.csv")
 df_vented = df_full.loc[df_full["spot_id"].isin(spot_ids_vented)]
-train_idx, val_idx, test_idx =get_train_val_test(df_vented)
+train_idx, val_idx, test_idx = get_train_val_test(df_vented)
 df = df_vented.loc[train_idx.union(val_idx)]
 df = df.sort_values(by="epoch").reset_index(drop=True)
 df["inferred_solar_radiation"] = incoming_shortwave(df)
+
 
 def cost_function(x, df):
     # Unknowns

@@ -5,16 +5,16 @@ import matplotlib.dates as mdates
 
 
 params = {
-            'axes.labelsize': 18,
-            'font.size': 18,
-            'legend.fontsize': 14,
-            'xtick.labelsize': 18,
-            'ytick.labelsize': 18,
-            'text.usetex': True,
-            "font.family": "serif",
-            "font.serif": "Computer Modern",
-            'axes.grid': False
-        }
+    "axes.labelsize": 18,
+    "font.size": 18,
+    "legend.fontsize": 14,
+    "xtick.labelsize": 18,
+    "ytick.labelsize": 18,
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.serif": "Computer Modern",
+    "axes.grid": False,
+}
 plt.rcParams.update(params)
 
 
@@ -25,9 +25,9 @@ df_vented = df_full.loc[df_full["spot_id"].isin(spot_ids_vented)]
 df = df_vented.loc[df_vented["time"] < "2023-12-01"]
 df["time"] = pd.to_datetime(df["time"], utc=True)
 df = df.groupby("time", as_index=False)[["air_temperature_surface", "air_temperature"]].mean()
-mask = ((df["time"] > "2023-09-14") & (df["time"] < "2023-09-24"))
+mask = (df["time"] > "2023-09-14") & (df["time"] < "2023-09-24")
 
-#%%
+# %%
 fig, ax = plt.subplots()
 ax.plot(
     df["time"].values[mask],
@@ -48,7 +48,7 @@ ax.plot(
 )
 ax.set_ylabel(r"Air Temperature ($^{\circ}$C)")
 ax.legend(loc="upper left")
-plt.setp(ax.get_xticklabels(), rotation=30, ha='right')
+plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d"))
 fig.set_size_inches(9, 5)
 fig.tight_layout(pad=0.5)

@@ -27,13 +27,13 @@ df["U_10m_mean"] = df[["U_10m_s22", "U_10m_im"]].mean(axis=1)
 #     df.loc[dfs.index] = dfs
 
 filenames = [
-    'final_dataset.csv',
-    'final_dataset_asit_u.csv',
-    'final_dataset_asit_t.csv',
-    'final_dataset_asit_q.csv',
-    'final_dataset_asit_q_asit_t.csv',
-    'final_dataset_asit_u_asit_t.csv',
-    'final_dataset_asit_u_asit_q.csv'
+    "final_dataset.csv",
+    "final_dataset_asit_u.csv",
+    "final_dataset_asit_t.csv",
+    "final_dataset_asit_q.csv",
+    "final_dataset_asit_q_asit_t.csv",
+    "final_dataset_asit_u_asit_t.csv",
+    "final_dataset_asit_u_asit_q.csv",
 ]
 
 for filename in filenames:
@@ -52,7 +52,6 @@ for filename in filenames:
     else:
         q_var = "estimated_specific_humidity_nn"
 
-
     required_inputs = [
         wind_var,
         temp_var,
@@ -61,7 +60,7 @@ for filename in filenames:
         "atmospheric_pressure",
         "inferred_solar_radiation",
         "cp_coare_input",
-        "significant_wave_height"
+        "significant_wave_height",
     ]
 
     for ii in df.index:

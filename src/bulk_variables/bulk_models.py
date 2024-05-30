@@ -40,6 +40,7 @@ def incoming_shortwave(df):
     sw_out = model.predict(X_norm)
     return sw_out
 
+
 def air_temperature_box_model(df, kappa_mdpe, length_scale):
 
     # Inferred shortwave required for box model estimate
@@ -59,11 +60,11 @@ def air_temperature_box_model(df, kappa_mdpe, length_scale):
     D = 0.297  # spotter diameter, m
     L = 0.01  # spotter thickness, m
     vol_air_spot = (4 * np.pi / 3) * ((D - L) / 2) ** 3
-    vol_mdpe_spot = (length_scale ** 3) * (4 * np.pi / 3) * (D / 2) ** 3 - vol_air_spot
+    vol_mdpe_spot = (length_scale**3) * (4 * np.pi / 3) * (D / 2) ** 3 - vol_air_spot
     surface_area_spot = 4 * np.pi * (D / 2) ** 2
 
     spot_air_fraction = 0.5
-    air_surface_area_spot = surface_area_spot * spot_air_fraction * (length_scale ** 2)
+    air_surface_area_spot = surface_area_spot * spot_air_fraction * (length_scale**2)
     water_surface_area_spot = surface_area_spot * 0.5
 
     # Setting up a balance
@@ -72,8 +73,9 @@ def air_temperature_box_model(df, kappa_mdpe, length_scale):
     dUdt_air = rho_air * cp_air * dTdt * vol_air_spot  # W
     dUdt = dUdt_mdpe + dUdt_air
     R_in = df["inferred_solar_radiation"].values  # W/m^2
-    T_spot_outer = (df["air_temperature"] * 0.5 + df[
-        "sea_surface_temperature"] * 0.5).values  # assume the spotter shell temp is a weighted mean of the shell and water temp
+    T_spot_outer = (
+        df["air_temperature"] * 0.5 + df["sea_surface_temperature"] * 0.5
+    ).values  # assume the spotter shell temp is a weighted mean of the shell and water temp
     T_spot_inner = df["air_temperature"].values
     T_water = df["sea_surface_temperature"].values
     Q_solar = R_in * (1 - albedo_spot)
@@ -89,9 +91,11 @@ def air_temperature_box_model(df, kappa_mdpe, length_scale):
 
     estimated_air_temp = np.zeros_like(T_spot_inner)
     for ii in range(len(T_spot_inner)):
+
         def func_zero(T_air, idx):
             return np.abs(
-                dUdt[idx] - Q_solar[idx] * air_surface_area_spot
+                dUdt[idx]
+                - Q_solar[idx] * air_surface_area_spot
                 - sigma * water_surface_area_spot * (T_water[idx] + 273.15) ** 4
                 + sigma * surface_area_spot * (T_spot_outer[idx] + 273.15) ** 4
                 + h_air[idx] * T_spot_outer[idx] * air_surface_area_spot
@@ -104,6 +108,7 @@ def air_temperature_box_model(df, kappa_mdpe, length_scale):
         estimated_air_temp[ii] = res.x.item()
 
     return estimated_air_temp
+
 
 def air_temperature_nn(df):
 
@@ -130,9 +135,7 @@ def air_temperature_nn(df):
     with open(f"{base_path}/models/air_temp/trial.json", "r") as f:
         trial = json.load(f)
     hp = trial["hyperparameters"]["values"]
-    model = define_model(
-        units=hp["units"], num_layers=hp["num_layers"], activation=hp["activation"], l2=hp["l2"]
-    )
+    model = define_model(units=hp["units"], num_layers=hp["num_layers"], activation=hp["activation"], l2=hp["l2"])
     model.load_weights(f"{base_path}/models/air_temp/checkpoint")
 
     norms = np.load(f"{base_path}/models/air_temp/norms.npy", allow_pickle=True).item()
@@ -155,6 +158,7 @@ def air_temperature_nn(df):
     # Neural net predicts the residual
     air_temp_out = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
     return air_temp_out
+
 
 def specific_humidity_nn(df):
     model = keras.models.load_model(f"{base_path}/models/q")

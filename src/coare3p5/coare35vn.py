@@ -424,7 +424,7 @@ def coare35vn(
 
     Qs = meteo.qsea(ts, P) / 1000.0  # surface water specific humidity (kg/kg)
 
-    #Q, Pv = meteo.qair(t, P, rh)  # specific hum. and partial Pv (mb)
+    # Q, Pv = meteo.qair(t, P, rh)  # specific hum. and partial Pv (mb)
 
     Q = q / 1000.0  # Q (kg/kg)
 
@@ -454,7 +454,7 @@ def coare35vn(
 
     rhoa = P * 100.0 / (Rgas * (t + tdk) * (1 + 0.61 * Q))
 
-    #rhodry = (P - Pv) * 100.0 / (Rgas * (t + tdk))
+    # rhodry = (P - Pv) * 100.0 / (Rgas * (t + tdk))
 
     visa = 1.326e-5 * (1 + 6.542e-3 * t + 8.301e-6 * t**2 - 4.84e-9 * t**3)
 
