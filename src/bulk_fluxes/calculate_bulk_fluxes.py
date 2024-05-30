@@ -9,8 +9,6 @@ df = pd.read_csv(f"{data_path}/bulk_variable_dataset.csv")
 df["latent_heat_flux_spotter_coare"] = np.nan
 df["sensible_heat_flux_spotter_coare"] = np.nan
 df["ustar_spotter_coare"] = np.nan
-# df["U_10m_mean"] = df[["U_10m_s22", "U_10m_im"]].mean(axis=1)
-
 
 filenames = [
     "final_flux_dataset.csv",
