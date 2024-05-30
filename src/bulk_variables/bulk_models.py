@@ -4,6 +4,7 @@ from keras import layers
 import numpy as np
 import os
 from scipy.optimize import root
+from src.coare3p5.meteo import qair
 
 base_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -23,8 +24,6 @@ def get_train_val_test(df):
 def incoming_shortwave(df):
     model = keras.models.load_model(f"{base_path}/models/shortwave")
     norms = np.load(f"{base_path}/models/shortwave/norms.npy", allow_pickle=True).item()
-    df["log_battery_power"] = np.log(df["battery_power"])
-    df.loc[df["battery_power"] <= 0, "log_battery_power"] = -9
 
     features = [
         "air_temperature",
@@ -80,8 +79,8 @@ def air_temperature_box_model(df, kappa_mdpe, length_scale):
     Q_solar = R_in * (1 - albedo_spot)
 
     # Convection to Air
-    u_surface = df["U_10m_mean"].values
-    Re = u_surface * 0.407 / 1.48e-5
+    U10 = df["U_10m_mean"].values
+    Re = U10 * 0.407 / 1.48e-5
 
     # Turbulent formulation, flat plate
     Nu = 0.037 * (Re ** (4 / 5))
@@ -108,30 +107,31 @@ def air_temperature_box_model(df, kappa_mdpe, length_scale):
 
 def air_temperature_nn(df):
 
-    def define_model(units, num_layers, activation, lr, l2):
+    def define_model(units, num_layers, activation, l2):
         model_layers = [
             layers.Dense(
                 units,
                 activation=activation,
                 kernel_regularizer=keras.regularizers.L2(l2=l2),
-                kernel_initializer=keras.initializers.HeNormal(),
             )
         ] * num_layers
         model_layers += [layers.Dense(1)]
         model = keras.Sequential(model_layers)
-        model.compile(loss="mse", optimizer=keras.optimizers.Adam(learning_rate=lr))
+        model.compile()
 
         return model
 
-    # Making sure we have the semianalytical air temp
+    # Making sure we have the semi-analytical air temp
     if "estimated_air_temperature" not in df.columns:
-        df["estimated_air_temperature"] = air_temperature_nn(df)
+        optimal_params = np.load(f"{base_path}/models/air_temp/box_model_params.npy", allow_pickle=True).item()
+        kappa, length_scale = optimal_params["kappa"], optimal_params["length_scale"]
+        df["estimated_air_temperature"] = air_temperature_box_model(df, kappa, length_scale)
 
     with open(f"{base_path}/models/air_temp/trial.json", "r") as f:
         trial = json.load(f)
     hp = trial["hyperparameters"]["values"]
     model = define_model(
-        units=hp["units"], num_layers=hp["num_layers"], activation=hp["activation"], lr=hp["lr"], l2=hp["l2"]
+        units=hp["units"], num_layers=hp["num_layers"], activation=hp["activation"], l2=hp["l2"]
     )
     model.load_weights(f"{base_path}/models/air_temp/checkpoint")
 
@@ -151,5 +151,29 @@ def air_temperature_nn(df):
 
     X = df[features].values
     X_norm = (X - norms["mean"]) / norms["std"]
-    air_temp_out = model.predict(X_norm)
+
+    # Neural net predicts the residual
+    air_temp_out = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
     return air_temp_out
+
+def specific_humidity_nn(df):
+    model = keras.models.load_model(f"{base_path}/models/q")
+    norms = np.load(f"{base_path}/models/q/norms.npy", allow_pickle=True).item()
+
+    if "estimated_air_temperature_nn" not in df.columns:
+        df["estimated_air_temperature_nn"] = air_temperature_nn(df)
+
+    df["q_inner"], _ = qair(df["air_temperature"], df["atmospheric_pressure"], df["relative_humidity"])
+    features = [
+        "estimated_air_temperature_nn",
+        "q_inner",
+        "solar_voltage",
+        "sea_surface_temperature",
+        "U_10m_mean",
+        "significant_wave_height",
+    ]
+
+    X = df[features].values
+    X_norm = (X - norms["mean"]) / norms["std"]
+    q_out = model.predict(X_norm).squeeze()
+    return q_out
