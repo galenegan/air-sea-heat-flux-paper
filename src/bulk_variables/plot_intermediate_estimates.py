@@ -21,6 +21,7 @@ params = {
 }
 plt.rcParams.update(params)
 
+
 def mae(x, y):
     return np.nanmean(np.abs(x - y))
 
@@ -39,7 +40,7 @@ df = air_temperature_linear(df)
 df = incoming_shortwave_box_model(df)
 df = specific_humidity_exp_decay(df)
 
-#%% Plotting the three variables
+# %% Plotting the three variables
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 
 # Air temperature

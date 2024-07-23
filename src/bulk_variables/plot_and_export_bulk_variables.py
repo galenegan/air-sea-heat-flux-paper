@@ -52,7 +52,7 @@ df.to_csv(f"{project_root}/data/bulk_variable_dataset.csv", index=False)
 fig, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3)
 
 
-#%% Air temperature
+# %% Air temperature
 predicted_variable = "estimated_air_temperature_nn"
 ground_truth_variable = "air_temperature_surface"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
@@ -62,9 +62,13 @@ train_bias = bias(df.loc[train_idx, predicted_variable], df.loc[train_idx, groun
 eval_bias = bias(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_bias = bias(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
 
-one_train = np.linspace(df.loc[train_idx, ground_truth_variable].min(), df.loc[train_idx, ground_truth_variable].max(), 100)
+one_train = np.linspace(
+    df.loc[train_idx, ground_truth_variable].min(), df.loc[train_idx, ground_truth_variable].max(), 100
+)
 one_val = np.linspace(df.loc[val_idx, ground_truth_variable].min(), df.loc[val_idx, ground_truth_variable].max(), 100)
-one_test = np.linspace(df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100)
+one_test = np.linspace(
+    df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100
+)
 
 lower_lim = -6
 upper_lim = 1.2 * np.max(df[[ground_truth_variable, predicted_variable]])
@@ -80,7 +84,7 @@ ax1.plot(
 ax1.annotate(
     f"Train: MAE = {train_score:.2f}" + r"$^\circ$C," + f" Bias = {train_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 ax1.plot(one_train, one_train, "-", color="#9f1853", linewidth=3)
 
@@ -96,7 +100,7 @@ ax2.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax2.annotate(
     f"Val: MAE = {eval_score:.2f}" + r"$^\circ$C," + f" Bias = {eval_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 
 ax3.plot(
@@ -111,7 +115,7 @@ ax3.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax3.annotate(
     f"Test: MAE = {test_score:.2f}" + r"$^\circ$C," + f" Bias = {test_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 
 ax1.set_title("(d)")
@@ -128,7 +132,7 @@ for ax in [ax1, ax2, ax3]:
 print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
 
 
-#%% Shortwave
+# %% Shortwave
 predicted_variable = "shortwave_nn"
 ground_truth_variable = "solar_down"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
@@ -138,9 +142,13 @@ train_bias = bias(df.loc[train_idx, predicted_variable], df.loc[train_idx, groun
 eval_bias = bias(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_bias = bias(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
 
-one_train = np.linspace(df.loc[train_idx, ground_truth_variable].min(), df.loc[train_idx, ground_truth_variable].max(), 100)
+one_train = np.linspace(
+    df.loc[train_idx, ground_truth_variable].min(), df.loc[train_idx, ground_truth_variable].max(), 100
+)
 one_val = np.linspace(df.loc[val_idx, ground_truth_variable].min(), df.loc[val_idx, ground_truth_variable].max(), 100)
-one_test = np.linspace(df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100)
+one_test = np.linspace(
+    df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100
+)
 
 lower_lim = -100
 upper_lim = 1.15 * np.max(df[[ground_truth_variable, predicted_variable]])
@@ -155,7 +163,7 @@ ax4.plot(
 ax4.annotate(
     f"Train: MAE = {train_score:.2f}" + r" W/m$^2$," + f" Bias = {train_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 ax4.plot(one_train, one_train, "-", color="#9f1853", linewidth=3)
 
@@ -171,7 +179,7 @@ ax5.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax5.annotate(
     f"Val: MAE = {eval_score:.2f}" + r" W/m$^2$," + f" Bias = {eval_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 
 ax6.plot(
@@ -186,7 +194,7 @@ ax6.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax6.annotate(
     f"Test: MAE = {test_score:.2f}" + r" W/m$^2$," + f" Bias = {test_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 
 ax4.set_title("(a)")
@@ -210,9 +218,13 @@ train_bias = bias(df.loc[train_idx, predicted_variable], df.loc[train_idx, groun
 eval_bias = bias(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_bias = bias(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
 
-one_train = np.linspace(df.loc[train_idx, ground_truth_variable].min(), df.loc[train_idx, ground_truth_variable].max(), 100)
+one_train = np.linspace(
+    df.loc[train_idx, ground_truth_variable].min(), df.loc[train_idx, ground_truth_variable].max(), 100
+)
 one_val = np.linspace(df.loc[val_idx, ground_truth_variable].min(), df.loc[val_idx, ground_truth_variable].max(), 100)
-one_test = np.linspace(df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100)
+one_test = np.linspace(
+    df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100
+)
 
 lower_lim = 1
 upper_lim = 1.15 * np.max(df[[ground_truth_variable, predicted_variable]])
@@ -228,9 +240,9 @@ ax7.plot(
     markersize=4,
 )
 ax7.annotate(
-    f"Train: MAE = {train_score:.2f}" + " g/kg," + f" Bias = {train_bias:.2f}" +" g/kg",
+    f"Train: MAE = {train_score:.2f}" + " g/kg," + f" Bias = {train_bias:.2f}" + " g/kg",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 ax7.plot(one_train, one_train, "-", color="#9f1853", linewidth=3)
 
@@ -246,7 +258,7 @@ ax8.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax8.annotate(
     f"Val: MAE = {eval_score:.2f}" + " g/kg," + f" Bias = {eval_bias:.2f}" + " g/kg",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 
 ax9.plot(
@@ -261,7 +273,7 @@ ax9.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax9.annotate(
     f"Test: MAE = {test_score:.2f}" + " g/kg," + f" Bias = {test_bias:.2f}" + " g/kg",
     xy=(0.02, 0.9),
-    xycoords="axes fraction"
+    xycoords="axes fraction",
 )
 
 
