@@ -99,7 +99,7 @@ ax2.set_ylim(-100, 1250)
 ax2.set_xticks(np.arange(0, 1250, 200))
 ax2.set_yticks(np.arange(0, 1250, 200))
 
-# SPecific humidity
+# Specific humidity
 mae_plot = np.nanmean(np.abs(df["estimated_q_outer"].values - df["specific_humidity_surface"].values))
 bias_plot = np.nanmean(df["estimated_q_outer"].values - df["specific_humidity_surface"].values)
 one = np.linspace(df["specific_humidity_surface"].min(), df["specific_humidity_surface"].max(), 100)
@@ -122,10 +122,10 @@ ax3.plot(
 ax3.legend()
 ax3.set_xlabel(r"Exponential Decay $q$ (g/kg)")
 ax3.set_ylabel(r"ASIT $q$ (g/kg)")
-ax3.set_xlim(1, 22)
-ax3.set_ylim(1, 22)
-ax3.set_xticks(np.arange(5, 21, 5))
-ax3.set_yticks(np.arange(5, 21, 5))
+ax3.set_xlim(1, 26)
+ax3.set_ylim(1, 26)
+ax3.set_xticks(np.arange(5, 26, 5))
+ax3.set_yticks(np.arange(5, 26, 5))
 
 fig.set_size_inches(17, 5)
 fig.tight_layout(pad=0.5)
