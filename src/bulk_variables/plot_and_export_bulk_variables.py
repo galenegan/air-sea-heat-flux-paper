@@ -133,7 +133,7 @@ print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
 
 
 # %% Shortwave
-predicted_variable = "shortwave_nn"
+predicted_variable = "estimated_shortwave_rf"
 ground_truth_variable = "solar_down"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_score = mae(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])

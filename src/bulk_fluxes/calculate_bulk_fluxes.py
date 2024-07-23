@@ -42,7 +42,7 @@ for filename in filenames:
         q_var,
         "sea_surface_temperature",
         "atmospheric_pressure",
-        "inferred_solar_radiation",
+        "estimated_shortwave_rf",
         "cp_coare_input",
         "significant_wave_height",
     ]
@@ -57,7 +57,7 @@ for filename in filenames:
             q=df.loc[ii, q_var],
             ts=df.loc[ii, "sea_surface_temperature"],
             P=df.loc[ii, "atmospheric_pressure"],
-            Rs=df.loc[ii, "inferred_solar_radiation"],
+            Rs=df.loc[ii, "estimated_shortwave_rf"],
             zu=10,
             zt=0.2,
             zq=0.2,
