@@ -10,9 +10,9 @@ from src.bulk_variables.bulk_models import (
 )
 
 params = {
-    "axes.labelsize": 16,
-    "font.size": 16,
-    "legend.fontsize": 12,
+    "axes.labelsize": 20,
+    "font.size": 20,
+    "legend.fontsize": 13,
     "xtick.labelsize": 16,
     "ytick.labelsize": 16,
     "text.usetex": True,
@@ -47,12 +47,12 @@ df["estimated_air_temperature_nn"] = air_temperature_nn(df)
 df["estimated_specific_humidity_nn"] = specific_humidity_nn(df)
 
 # Exporting for bulk flux calculations
-# df.to_csv(f"{project_root}/data/bulk_variable_dataset.csv", index=False)
+df.to_csv(f"{project_root}/data/bulk_variable_dataset.csv", index=False)
 
 # %% Semi-analytical air temperature
 dfplot = df.loc[full_idx]
-mae = np.nanmean(np.abs(dfplot["estimated_air_temperature"].values - dfplot["air_temperature_surface"].values))
-bias = np.nanmean(dfplot["estimated_air_temperature"].values - dfplot["air_temperature_surface"].values)
+mae_plot = np.nanmean(np.abs(dfplot["estimated_air_temperature"].values - dfplot["air_temperature_surface"].values))
+bias_plot = np.nanmean(dfplot["estimated_air_temperature"].values - dfplot["air_temperature_surface"].values)
 one = np.linspace(dfplot["air_temperature_surface"].min(), dfplot["air_temperature_surface"].max(), 100)
 
 fig, ax = plt.subplots()
@@ -69,7 +69,7 @@ ax.plot(
     "-",
     color="#9f1853",
     linewidth=3,
-    label=f"MAE = {mae:.2f} " + r"$^\circ$C" + f", Bias = {bias:.2f} " + r"$^\circ$C",
+    label=f"MAE = {mae_plot:.2f} " + r"$^\circ$C" + f", Bias = {bias_plot:.2f} " + r"$^\circ$C",
 )
 ax.legend()
 ax.set_xlabel(r"Analytical $\tilde{T}_{\textrm{air}}$ $(^\circ C)$")
@@ -81,7 +81,7 @@ ax.set_yticks(np.arange(-5, 36, 5))
 fig.set_size_inches(7, 6)
 fig.tight_layout(pad=0.5)
 plt.rcParams.update(params)
-plt.savefig(f"{project_root}/plots/tair_analytical.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/tair_analytical.png", dpi=300)
 plt.show()
 
 # %% Plotting
@@ -135,6 +135,8 @@ ax1.legend(loc="upper left")
 ax1.set_xlim(lower_lim, upper_lim)
 ax1.set_ylim(lower_lim, upper_lim)
 
+print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
+
 # %% Air temperature
 predicted_variable = "estimated_air_temperature_nn"
 ground_truth_variable = "air_temperature_surface"
@@ -186,6 +188,8 @@ for lh in leg.legendHandles[1:]:
 ax2.set_xlim(lower_lim, upper_lim)
 ax2.set_ylim(lower_lim, upper_lim)
 
+print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
+
 # %% Specific Humidity
 predicted_variable = "estimated_specific_humidity_nn"
 ground_truth_variable = "specific_humidity_surface"
@@ -198,6 +202,8 @@ test_bias = bias(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_t
 one = np.linspace(df.loc[full_idx, ground_truth_variable].min(), df.loc[full_idx, ground_truth_variable].max(), 100)
 lower_lim = 1
 upper_lim = 1.25 * np.max(df[[ground_truth_variable, predicted_variable]])
+
+print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
 
 ax3.plot(
     df.loc[train_idx, predicted_variable],

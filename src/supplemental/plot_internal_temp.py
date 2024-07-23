@@ -19,11 +19,11 @@ plt.rcParams.update(params)
 
 project_root = get_project_root()
 data_path = f"{project_root}/data"
-df = pd.read_csv(f"{data_path}/training_dataset.csv")
+df = pd.read_csv(f"{data_path}/bulk_variable_dataset.csv")
 spot_ids_vented = ["31081C", "31084C", "31085C"]
 df = df.loc[df["spot_id"].isin(spot_ids_vented)]
 df["time"] = pd.to_datetime(df["time"], utc=True)
-df = df.groupby("time", as_index=False)[["air_temperature_surface", "air_temperature"]].mean()
+df = df.groupby("time", as_index=False)[["air_temperature_surface", "air_temperature", "estimated_air_temperature"]].mean()
 mask = (df["time"] > "2023-09-14") & (df["time"] < "2023-09-24")
 
 # %%
@@ -44,6 +44,15 @@ ax.plot(
     alpha=0.8,
     linewidth=2,
     label="Spotter Internal",
+)
+ax.plot(
+    df["time"].values[mask],
+    df["estimated_air_temperature"].values[mask],
+    "--",
+    color="#9f1853",
+    alpha=0.8,
+    linewidth=1.5,
+    label="Eq. 4 Estimate",
 )
 ax.set_ylabel(r"Air Temperature ($^{\circ}$C)")
 ax.legend(loc="upper left")

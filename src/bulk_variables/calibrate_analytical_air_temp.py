@@ -29,4 +29,4 @@ def cost_function(x, df):
 
 res = minimize(cost_function, x0=[0.28, 1.0], bounds=((0.05, 0.5), (1.0, 1.4)), args=(df,))
 optimal_params = {"kappa": res.x[0], "length_scale": res.x[1]}
-np.save(f"{file_path}/models/air_temp/box_model_params.npy", optimal_params)
+np.save(f"{file_path}/models/air_temp/box_model_params_unvented.npy", optimal_params)

@@ -4,7 +4,6 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import pandas as pd
 from src.utils import get_project_root
-from src.bulk_variables.bulk_models import get_train_val_test
 
 params = {
     "axes.labelsize": 16,
@@ -41,8 +40,6 @@ project_root = get_project_root()
 data_path = f"{project_root}/data"
 df = pd.read_csv(f"{data_path}/final_flux_dataset.csv")
 df["time"] = pd.to_datetime(df["time"], utc=True)
-train_idx, val_idx, test_idx = get_train_val_test(df)
-df = df.loc[test_idx]
 df = df.loc[df["spot_id"] == "31085C"]  # Last remaining vented Spotter during test set
 
 # %%
@@ -164,7 +161,6 @@ ax3.set_title("(c)")
 dflux = np.gradient(df["latent_heat_flux_dc"].values, df["epoch"].values)
 gradient_cutoff = np.nanstd(dflux)
 asit_residual = np.abs(df["latent_heat_flux_asit_coare"].values - df["latent_heat_flux_dc"].values)
-spot_asit_residual = np.abs(df["latent_heat_flux_asit_coare"].values - df["latent_heat_flux_spotter_coare"].values)
 asit_residual_cutoff = 75
 asit_relative_residual = np.abs(df["latent_heat_flux_dc"].values / df["latent_heat_flux_asit_coare"].values)
 
@@ -176,7 +172,6 @@ mask = (
     & (asit_relative_residual < 5)
     & (df["rain_rate_13m"].values < 1)
     & (df["epoch"].values >= pd.Timestamp("2023-12-01T00:00:00Z").timestamp())
-    & (df["epoch"].values <= pd.Timestamp("2024-01-10T00:00:00Z").timestamp())
 )
 one = np.linspace(
     np.nanmin(df["latent_heat_flux_dc"].values[mask]), np.nanmax(df["latent_heat_flux_dc"].values[mask]), 100
