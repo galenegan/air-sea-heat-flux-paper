@@ -43,12 +43,18 @@ def air_temperature_linear(df):
         return dfout
 
     df = fill_night_temp(df)
+    df = df.sort_index()
     X = np.vstack((df["delta_night_air_temp"].values, df["delta_night_sst"].values)).T
+    pred_idx = ~np.isnan(X).any(axis=1)
 
     # Loading the linear model
     model = joblib.load(f"{base_path}/models/air_temp/linear/model.pkl")
-    estimated_air_temperature = df["air_temperature"].values - model.predict(X).squeeze()
-    return estimated_air_temperature
+    estimated_air_temperature = np.zeros((X.shape[0],)) * np.nan
+    estimated_air_temperature[pred_idx] = (
+        df["air_temperature"].values[pred_idx] - model.predict(X[pred_idx, :]).squeeze()
+    )
+    df["estimated_air_temperature"] = estimated_air_temperature
+    return df
 
 
 def air_temperature_nn(df):
@@ -75,7 +81,7 @@ def air_temperature_nn(df):
 
     # Making sure we have the semi-analytical air temp
     if "estimated_air_temperature" not in df.columns:
-        df["estimated_air_temperature"] = air_temperature_linear(df)
+        df = air_temperature_linear(df)
 
     with open(f"{base_path}/models/air_temp/neural_net/trial.json", "r") as f:
         trial = json.load(f)
@@ -97,8 +103,8 @@ def air_temperature_nn(df):
     X_norm = (X - norms["mean"]) / norms["std"]
 
     # Neural net predicts the residual
-    air_temp_out = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
-    return air_temp_out
+    df["estimated_air_temperature_nn"] = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
+    return df
 
 
 def incoming_shortwave_box_model(df):
@@ -109,9 +115,9 @@ def incoming_shortwave_box_model(df):
     """
 
     if "estimated_air_temperature" not in df.columns:
-        df["estimated_air_temperature"] = air_temperature_linear(df)
+        df = air_temperature_linear(df)
 
-    x = np.load(f"{base_path}/models/shortwave/box/optimal_params.npy", allow_pickle=True).item()
+    x = np.load(f"{base_path}/models/shortwave/box/optimal_params.npy", allow_pickle=True)
     kappa_mdpe, length_scale, albedo_spot, weight_ta, weight_ti = x[0], x[1], x[2], x[3], x[4]
 
     # Some constants
@@ -169,7 +175,8 @@ def incoming_shortwave_box_model(df):
         / (1 - albedo_spot)
     )
     estimated_solar = np.maximum(estimated_solar, 0)
-    return estimated_solar
+    df["box_model_solar"] = estimated_solar
+    return df
 
 
 def incoming_shortwave_random_forest(df):
@@ -180,14 +187,14 @@ def incoming_shortwave_random_forest(df):
     """
 
     if "box_model_solar" not in df.columns:
-        df["box_model_solar"] = incoming_shortwave_box_model(df)
+        df = incoming_shortwave_box_model(df)
 
     model = joblib.load(f"{base_path}/models/shortwave/random_forest/model.pkl")
     norms = np.load(f"{base_path}/models/shortwave/random_forest/norms.npy", allow_pickle=True).item()
 
     features = [
         "box_model_solar",
-        "delta_night_temp",
+        "delta_night_air_temp",
         "solar_voltage",
         "log_battery_power",
         "sea_surface_temperature",
@@ -196,31 +203,31 @@ def incoming_shortwave_random_forest(df):
     X = df.loc[:, features].values
     X_norm = (X - norms["mean"]) / norms["std"]
     shortwave_out = df["box_model_solar"].values - model.predict(X_norm).squeeze()
-    return shortwave_out
+    df["shortwave_nn"] = shortwave_out
+    return df
 
 
 def specific_humidity_exp_decay(df):
-    x = np.load(f"{base_path}/models/q/exponential_decay/optimal_params.npy", allow_pickle=True).item()
+    x = np.load(f"{base_path}/models/q/exponential_decay/optimal_params.npy", allow_pickle=True)
     a, b, c = x[0], x[1], x[2]
 
-    df["q_inner"], _ = qair(
-        df["air_temperature"], df["atmospheric_pressure"], df["relative_humidity"]
-    )
+    df["q_inner"], _ = qair(df["air_temperature"], df["atmospheric_pressure"], df["relative_humidity"])
     df["days"] = (df["epoch"] - df["epoch"].min()) / 86400
     estimated_q_outer = df["q_inner"].values + (a * np.exp(b * df["days"].values) + c)
-    return estimated_q_outer
+    df["estimated_q_outer"] = estimated_q_outer
+    return df
 
 
 def specific_humidity_nn(df):
     def define_model(units, num_layers, activation, l2):
         model_layers = [
-                           layers.Dense(
-                               units,
-                               activation=activation,
-                               kernel_regularizer=regularizers.L2(l2=l2),
-                               kernel_initializer=keras.initializers.HeNormal(),
-                           )
-                       ] * num_layers
+            layers.Dense(
+                units,
+                activation=activation,
+                kernel_regularizer=regularizers.L2(l2=l2),
+                kernel_initializer=keras.initializers.HeNormal(),
+            )
+        ] * num_layers
         model_layers += [layers.Dense(1)]
         model = keras.Sequential(model_layers)
         model.compile()
@@ -229,10 +236,10 @@ def specific_humidity_nn(df):
 
     # Making sure we have the rough estimates of air temp and q
     if "estimated_q_outer" not in df.columns:
-        df["estimated_q_outer"] = specific_humidity_exp_decay(df)
+        df = specific_humidity_exp_decay(df)
 
     if "estimated_air_temperature" not in df.columns:
-        df["estimated_air_temperature"] = air_temperature_linear(df)
+        df = air_temperature_linear(df)
 
     with open(f"{base_path}/models/q/neural_net/trial.json", "r") as f:
         trial = json.load(f)
@@ -253,4 +260,5 @@ def specific_humidity_nn(df):
     X = df.loc[:, features].values
     X_norm = (X - norms["mean"]) / norms["std"]
     q_out = df["estimated_q_outer"].values - model.predict(X_norm).squeeze()
-    return q_out
+    df["estimated_specific_humidity_nn"] = q_out
+    return df
