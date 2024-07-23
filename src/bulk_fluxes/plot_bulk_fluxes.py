@@ -40,7 +40,7 @@ project_root = get_project_root()
 data_path = f"{project_root}/data"
 df = pd.read_csv(f"{data_path}/final_flux_dataset.csv")
 df["time"] = pd.to_datetime(df["time"], utc=True)
-df = df.loc[df["spot_id"] == "31085C"]  # Last remaining vented Spotter during test set
+df = df.loc[df["spot_id"] == "31085C"]  # Last remaining vented Spotter during most of the test set
 
 # %%
 dflux = np.gradient(df["sensible_heat_flux_dc"].values, df["epoch"].values)
@@ -57,8 +57,8 @@ mask = (
     & (dflux < gradient_cutoff)
     & (asit_residual < asit_residual_cutoff)
     & (asit_relative_residual < 5)
-    & (df["rain_rate_13m"].values < 1)
-    & (df["epoch"].values >= pd.Timestamp("2023-12-01T00:00:00Z").timestamp())
+    & (df["rain_rate"].values < 1)
+    & (df["epoch"].values < pd.Timestamp("2024-01-01T00:00:00Z").timestamp())
 )
 
 
@@ -170,8 +170,8 @@ mask = (
     & (dflux < gradient_cutoff)
     & (asit_residual < asit_residual_cutoff)
     & (asit_relative_residual < 5)
-    & (df["rain_rate_13m"].values < 1)
-    & (df["epoch"].values >= pd.Timestamp("2023-12-01T00:00:00Z").timestamp())
+    & (df["rain_rate"].values < 1)
+    & (df["epoch"].values < pd.Timestamp("2024-01-01T00:00:00Z").timestamp())
 )
 one = np.linspace(
     np.nanmin(df["latent_heat_flux_dc"].values[mask]), np.nanmax(df["latent_heat_flux_dc"].values[mask]), 100
@@ -260,5 +260,5 @@ ax6.set_title("(f)")
 
 fig.set_size_inches(10, 16)
 fig.tight_layout(pad=1)
-plt.savefig(f"{project_root}/plots/bulk_fluxes.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/bulk_fluxes.png", dpi=300)
 plt.show()

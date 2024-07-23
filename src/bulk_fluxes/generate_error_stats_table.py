@@ -51,8 +51,8 @@ def get_sensible_mask(df):
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)
-        & (df["rain_rate_13m"].values < 1)
-        & (df["epoch"].values >= pd.Timestamp("2023-12-01T00:00:00Z").timestamp())
+        & (df["rain_rate"].values < 1)
+        & (df["epoch"].values < pd.Timestamp("2024-01-01T00:00:00Z").timestamp())
     )
 
     return mask
@@ -71,8 +71,8 @@ def get_latent_mask(df):
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)
-        & (df["rain_rate_13m"].values < 1)
-        & (df["epoch"].values >= pd.Timestamp("2023-12-01T00:00:00Z").timestamp())
+        & (df["rain_rate"].values < 1)
+        & (df["epoch"].values < pd.Timestamp("2024-01-01T00:00:00Z").timestamp())
     )
 
     return mask
