@@ -51,9 +51,10 @@ df.to_csv(f"{project_root}/data/bulk_variable_dataset.csv", index=False)
 # %% Plotting
 fig, ((ax1, ax2, ax3), (ax4, ax5, ax6), (ax7, ax8, ax9)) = plt.subplots(3, 3)
 
-# Shortwave first
-predicted_variable = "shortwave_nn"
-ground_truth_variable = "solar_down"
+
+#%% Air temperature
+predicted_variable = "estimated_air_temperature_nn"
+ground_truth_variable = "air_temperature_surface"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_score = mae(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_score = mae(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
@@ -65,8 +66,9 @@ one_train = np.linspace(df.loc[train_idx, ground_truth_variable].min(), df.loc[t
 one_val = np.linspace(df.loc[val_idx, ground_truth_variable].min(), df.loc[val_idx, ground_truth_variable].max(), 100)
 one_test = np.linspace(df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100)
 
-lower_lim = -100
-upper_lim = 1.4 * np.max(df[[ground_truth_variable, predicted_variable]])
+lower_lim = -6
+upper_lim = 1.2 * np.max(df[[ground_truth_variable, predicted_variable]])
+
 ax1.plot(
     df.loc[train_idx, predicted_variable],
     df.loc[train_idx, ground_truth_variable],
@@ -76,7 +78,7 @@ ax1.plot(
     markersize=4,
 )
 ax1.annotate(
-    f"Train: MAE = {train_score:.2f}" + r" W/m$^2$," + f" Bias = {train_bias:.2f}" + f" W/m$^2$",
+    f"Train: MAE = {train_score:.2f}" + r"$^\circ$C," + f" Bias = {train_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
     xycoords="axes fraction"
 )
@@ -92,7 +94,7 @@ ax2.plot(
 )
 ax2.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax2.annotate(
-    f"Val: MAE = {eval_score:.2f}" + r" W/m$^2$," + f" Bias = {eval_bias:.2f}" + f" W/m$^2$",
+    f"Val: MAE = {eval_score:.2f}" + r"$^\circ$C," + f" Bias = {eval_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
     xycoords="axes fraction"
 )
@@ -107,26 +109,28 @@ ax3.plot(
 )
 ax3.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax3.annotate(
-    f"Test: MAE = {test_score:.2f}" + r" W/m$^2$," + f" Bias = {test_bias:.2f}" + f" W/m$^2$",
+    f"Test: MAE = {test_score:.2f}" + r"$^\circ$C," + f" Bias = {test_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
     xycoords="axes fraction"
 )
 
-ax1.set_title("(a)")
-ax2.set_title("(b)")
-ax3.set_title("(c)")
+ax1.set_title("(d)")
+ax2.set_title("(e)")
+ax3.set_title("(f)")
 
 for ax in [ax1, ax2, ax3]:
-    ax.set_xlabel(r"Spotter $Q_{SW,\textrm{down}}$ (W/m$^2$)")
-    ax.set_ylabel(r"ASIT $Q_{SW,\textrm{down}}$ (W/m$^2$)")
+    ax.set_xlabel(r"Spotter $T_{\textrm{air}}$ $(^\circ C)$")
+    ax.set_ylabel(r"ASIT $T_{\textrm{air}}$ $(^\circ C)$")
     ax.set_xlim(lower_lim, upper_lim)
     ax.set_ylim(lower_lim, upper_lim)
+    ax.set_xticks(np.arange(-5, 31, 5))
 
 print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
 
-# %% Air temperature
-predicted_variable = "estimated_air_temperature_nn"
-ground_truth_variable = "air_temperature_surface"
+
+#%% Shortwave
+predicted_variable = "shortwave_nn"
+ground_truth_variable = "solar_down"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_score = mae(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_score = mae(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
@@ -138,9 +142,8 @@ one_train = np.linspace(df.loc[train_idx, ground_truth_variable].min(), df.loc[t
 one_val = np.linspace(df.loc[val_idx, ground_truth_variable].min(), df.loc[val_idx, ground_truth_variable].max(), 100)
 one_test = np.linspace(df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100)
 
-lower_lim = -6
-upper_lim = 1.3 * np.max(df[[ground_truth_variable, predicted_variable]])
-
+lower_lim = -100
+upper_lim = 1.15 * np.max(df[[ground_truth_variable, predicted_variable]])
 ax4.plot(
     df.loc[train_idx, predicted_variable],
     df.loc[train_idx, ground_truth_variable],
@@ -150,7 +153,7 @@ ax4.plot(
     markersize=4,
 )
 ax4.annotate(
-    f"Train: MAE = {train_score:.2f}" + r"$^\circ$C," + f" Bias = {train_bias:.2f}" + r"$^\circ$C",
+    f"Train: MAE = {train_score:.2f}" + r" W/m$^2$," + f" Bias = {train_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction"
 )
@@ -166,7 +169,7 @@ ax5.plot(
 )
 ax5.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax5.annotate(
-    f"Val: MAE = {eval_score:.2f}" + r"$^\circ$C," + f" Bias = {eval_bias:.2f}" + r"$^\circ$C",
+    f"Val: MAE = {eval_score:.2f}" + r" W/m$^2$," + f" Bias = {eval_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction"
 )
@@ -181,24 +184,22 @@ ax6.plot(
 )
 ax6.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax6.annotate(
-    f"Test: MAE = {test_score:.2f}" + r"$^\circ$C," + f" Bias = {test_bias:.2f}" + r"$^\circ$C",
+    f"Test: MAE = {test_score:.2f}" + r" W/m$^2$," + f" Bias = {test_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction"
 )
 
-ax4.set_title("(d)")
-ax5.set_title("(e)")
-ax6.set_title("(f)")
+ax4.set_title("(a)")
+ax5.set_title("(b)")
+ax6.set_title("(c)")
 
 for ax in [ax4, ax5, ax6]:
-    ax.set_xlabel(r"Spotter $T_{\textrm{air}}$ $(^\circ C)$")
-    ax.set_ylabel(r"ASIT $T_{\textrm{air}}$ $(^\circ C)$")
+    ax.set_xlabel(r"Spotter $Q_{SW,\textrm{down}}$ (W/m$^2$)")
+    ax.set_ylabel(r"ASIT $Q_{SW,\textrm{down}}$ (W/m$^2$)")
     ax.set_xlim(lower_lim, upper_lim)
     ax.set_ylim(lower_lim, upper_lim)
-    ax.set_xticks(np.arange(-5, 31, 5))
 
 print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
-
 # %% Specific Humidity
 predicted_variable = "estimated_specific_humidity_nn"
 ground_truth_variable = "specific_humidity_surface"
@@ -214,7 +215,7 @@ one_val = np.linspace(df.loc[val_idx, ground_truth_variable].min(), df.loc[val_i
 one_test = np.linspace(df.loc[test_idx, ground_truth_variable].min(), df.loc[test_idx, ground_truth_variable].max(), 100)
 
 lower_lim = 1
-upper_lim = 1.25 * np.max(df[[ground_truth_variable, predicted_variable]])
+upper_lim = 1.15 * np.max(df[[ground_truth_variable, predicted_variable]])
 
 print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
 
