@@ -23,7 +23,9 @@ df = pd.read_csv(f"{data_path}/bulk_variable_dataset.csv")
 spot_ids_vented = ["31081C", "31084C", "31085C"]
 df = df.loc[df["spot_id"].isin(spot_ids_vented)]
 df["time"] = pd.to_datetime(df["time"], utc=True)
-df = df.groupby("time", as_index=False)[["air_temperature_surface", "air_temperature", "estimated_air_temperature"]].mean()
+df = df.groupby("time", as_index=False)[
+    ["air_temperature_surface", "air_temperature", "estimated_air_temperature"]
+].mean()
 mask = (df["time"] > "2023-09-14") & (df["time"] < "2023-09-24")
 
 # %%
