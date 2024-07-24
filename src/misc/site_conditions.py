@@ -47,16 +47,16 @@ ax1.plot(df["time"], df["air_temperature_surface"], 'o', markersize=2, color="#0
 ax1.set_ylabel(r"$T_{\textrm{air}}$ ($^{\circ}$C)")
 ax1.set_yticks(np.arange(-10, 31, 10))
 
-ax2.plot(df["time"], df["sea_surface_temperature"], 'o', markersize=2, color="#012749")
-ax2.set_ylabel(r"$T_{\textrm{water}}$ ($^{\circ}$C)")
-ax2.set_yticks(np.arange(0, 26, 5))
+ax2.plot(df["time"], df["specific_humidity_surface"], 'o', markersize=2, color="#012749")
+ax2.set_ylabel(r"$q$ (g/kg)")
+ax2.set_yticks(np.arange(0, 22, 5))
 
-ax3.plot(df["time"], df["specific_humidity_surface"], 'o', markersize=2, color="#012749")
-ax3.set_ylabel(r"$q$ (g/kg)")
-ax3.set_yticks(np.arange(0, 22, 5))
+ax3.plot(df["time"], df["U_10m_coare"], 'o', markersize=2, color="#012749")
+ax3.set_ylabel(r"$U_{10}$ (m/s)")
+ax3.set_yticks(np.arange(0, 26, 5))
 
-ax4.plot(df["time"], df["U_10m_coare"], 'o', markersize=2, color="#012749")
-ax4.set_ylabel(r"$U_{10}$ (m/s)")
+ax4.plot(df["time"], df["sea_surface_temperature"], 'o', markersize=2, color="#012749")
+ax4.set_ylabel(r"$T_{\textrm{water}}$ ($^{\circ}$C)")
 ax4.set_yticks(np.arange(0, 26, 5))
 
 ax5.plot(df["time"], df["significant_wave_height"], 'o', markersize=2, color="#012749")

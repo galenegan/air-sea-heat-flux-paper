@@ -64,7 +64,7 @@ ax1.plot(
     label=f"MAE = {mae_plot:.2f} " + r"$^\circ$C" + f", Bias = {bias_plot:.2f} " + r"$^\circ$C",
 )
 ax1.legend()
-ax1.set_xlabel(r"Linear Regression $\tilde{T}_{\textrm{air}}$ $(^\circ C)$")
+ax1.set_xlabel(r"Linear Regression $T_{\textrm{air}}$ $(^\circ C)$")
 ax1.set_ylabel(r"ASIT $T_{\textrm{air}}$ $(^\circ C)$")
 ax1.set_xlim(-6, 32)
 ax1.set_ylim(-6, 32)

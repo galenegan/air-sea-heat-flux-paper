@@ -54,7 +54,7 @@ ax.plot(
     color="#9f1853",
     alpha=0.8,
     linewidth=1.5,
-    label="Eq. 4 Estimate",
+    label="Linear Regression",
 )
 ax.set_ylabel(r"Air Temperature ($^{\circ}$C)")
 ax.legend(loc="upper left")
@@ -62,5 +62,5 @@ plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d"))
 fig.set_size_inches(9, 5)
 fig.tight_layout(pad=0.5)
-plt.savefig(f"{project_root}/plots/spot_internal_supplemental.png", dpi=300)
+plt.savefig(f"{project_root}/plots/spot_internal_temp.png", dpi=300)
 plt.show()
