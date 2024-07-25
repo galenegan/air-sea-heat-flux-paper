@@ -203,7 +203,7 @@ def incoming_shortwave_random_forest(df):
     X = df.loc[:, features].values
     X_norm = (X - norms["mean"]) / norms["std"]
     shortwave_out = df["box_model_solar"].values - model.predict(X_norm).squeeze()
-    df["estimated_shortwave_rf"] = shortwave_out
+    df["estimated_shortwave_rf"] = np.maximum(shortwave_out, 0)
     return df
 
 

@@ -48,7 +48,7 @@ ax1.set_ylabel(r"$T_{\textrm{air}}$ ($^{\circ}$C)")
 ax1.set_yticks(np.arange(-10, 31, 10))
 
 ax2.plot(df["time"], df["specific_humidity_surface"], 'o', markersize=2, color="#012749")
-ax2.set_ylabel(r"$q$ (g/kg)")
+ax2.set_ylabel(r"$q_{\textrm{air}}$ (g/kg)")
 ax2.set_yticks(np.arange(0, 22, 5))
 
 ax3.plot(df["time"], df["U_10m_coare"], 'o', markersize=2, color="#012749")

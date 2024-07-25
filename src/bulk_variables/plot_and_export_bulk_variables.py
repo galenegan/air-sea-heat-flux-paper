@@ -118,9 +118,9 @@ ax3.annotate(
     xycoords="axes fraction",
 )
 
-ax1.set_title("(d)")
-ax2.set_title("(e)")
-ax3.set_title("(f)")
+ax1.set_title("(a)")
+ax2.set_title("(b)")
+ax3.set_title("(c)")
 
 for ax in [ax1, ax2, ax3]:
     ax.set_xlabel(r"Spotter $T_{\textrm{air}}$ $(^\circ C)$")
@@ -128,6 +128,7 @@ for ax in [ax1, ax2, ax3]:
     ax.set_xlim(lower_lim, upper_lim)
     ax.set_ylim(lower_lim, upper_lim)
     ax.set_xticks(np.arange(-5, 31, 5))
+    ax.set_yticks(np.arange(-5, 31, 5))
 
 print(test_score / np.ptp(df.loc[test_idx, ground_truth_variable]))
 
@@ -197,9 +198,9 @@ ax6.annotate(
     xycoords="axes fraction",
 )
 
-ax4.set_title("(a)")
-ax5.set_title("(b)")
-ax6.set_title("(c)")
+ax4.set_title("(d)")
+ax5.set_title("(e)")
+ax6.set_title("(f)")
 
 for ax in [ax4, ax5, ax6]:
     ax.set_xlabel(r"Spotter $Q_{SW,\textrm{down}}$ (W/m$^2$)")
@@ -282,8 +283,8 @@ ax8.set_title("(h)")
 ax9.set_title("(i)")
 
 for ax in [ax7, ax8, ax9]:
-    ax.set_xlabel(r"Spotter $q$ (g/kg)")
-    ax.set_ylabel(r"ASIT $q$ (g/kg)")
+    ax.set_xlabel(r"Spotter $q_{\textrm{air}}$ (g/kg)")
+    ax.set_ylabel(r"ASIT $q_{\textrm{air}}$ (g/kg)")
     ax.set_xlim(lower_lim, upper_lim)
     ax.set_ylim(lower_lim, upper_lim)
 
