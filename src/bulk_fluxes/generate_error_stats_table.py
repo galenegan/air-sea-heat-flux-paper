@@ -42,7 +42,7 @@ def get_sensible_mask(df):
     dflux = np.gradient(df["sensible_heat_flux_dc"].values, df["epoch"].values)
     gradient_cutoff = 1.96 * np.nanstd(dflux)
     asit_residual = np.abs(df["sensible_heat_flux_asit_coare"].values - df["sensible_heat_flux_dc"].values)
-    asit_residual_cutoff = 50
+    asit_residual_cutoff = 75
     asit_relative_residual = np.abs(df["sensible_heat_flux_dc"].values / df["sensible_heat_flux_asit_coare"].values)
 
     mask = (
@@ -51,8 +51,8 @@ def get_sensible_mask(df):
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)
-        & (df["rain_rate_13m"].values < 1)
-        & (df["epoch"].values >= pd.Timestamp("2023-12-01T00:00:00Z").timestamp())
+        & (df["rain_rate"].values < 1)
+        & (df["epoch"].values < pd.Timestamp("2024-01-01T00:00:00Z").timestamp())
     )
 
     return mask
@@ -60,9 +60,9 @@ def get_sensible_mask(df):
 
 def get_latent_mask(df):
     dflux = np.gradient(df["latent_heat_flux_dc"].values, df["epoch"].values)
-    gradient_cutoff = np.nanstd(dflux)
+    gradient_cutoff = 1.96 * np.nanstd(dflux)
     asit_residual = np.abs(df["latent_heat_flux_asit_coare"].values - df["latent_heat_flux_dc"].values)
-    asit_residual_cutoff = 75
+    asit_residual_cutoff = 100
     asit_relative_residual = np.abs(df["latent_heat_flux_dc"].values / df["latent_heat_flux_asit_coare"].values)
 
     mask = (
@@ -71,8 +71,8 @@ def get_latent_mask(df):
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)
-        & (df["rain_rate_13m"].values < 1)
-        & (df["epoch"].values >= pd.Timestamp("2023-12-01T00:00:00Z").timestamp())
+        & (df["rain_rate"].values < 1)
+        & (df["epoch"].values < pd.Timestamp("2024-01-01T00:00:00Z").timestamp())
     )
 
     return mask
