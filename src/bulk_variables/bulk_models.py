@@ -5,16 +5,15 @@ from keras import layers, regularizers
 import numpy as np
 import os
 import pandas as pd
+from typing import Tuple
 from src.coare3p5.meteo import qair
 
 base_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_train_val_test(df):
+def get_train_val_test(df: pd.DataFrame) -> Tuple:
     """
-    Docs
-    :param df:
-    :return:
+    Training, validation, and test split
     """
     train_idx = df.index[df["time"] >= "2024-02-01"]
     val_idx = df.index[((df["time"] >= "2024-01-01") & (df["time"] < "2024-02-01"))]
@@ -22,11 +21,9 @@ def get_train_val_test(df):
     return train_idx, val_idx, test_idx
 
 
-def air_temperature_linear(df):
+def air_temperature_linear(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Docs
-    :param df:
-    :return:
+    Add the linear air temperature estimate and related variables to a dataframe
     """
 
     def fill_night_temp(df):
@@ -57,11 +54,9 @@ def air_temperature_linear(df):
     return df
 
 
-def air_temperature_nn(df):
+def air_temperature_nn(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Docs
-    :param df:
-    :return:
+    Add the neural network air temperature estimate to a dataframe
     """
 
     def define_model(units, num_layers, activation, l2):
@@ -107,11 +102,9 @@ def air_temperature_nn(df):
     return df
 
 
-def incoming_shortwave_box_model(df):
+def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Docs
-    :param df:
-    :return:
+    Add the box model shortwave radiation estimate to a dataframe
     """
 
     if "estimated_air_temperature" not in df.columns:
@@ -179,11 +172,9 @@ def incoming_shortwave_box_model(df):
     return df
 
 
-def incoming_shortwave_random_forest(df):
+def incoming_shortwave_random_forest(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Docs
-    :param df:
-    :return:
+    Add the random forest shortwave estimate to a dataframe
     """
 
     if "box_model_solar" not in df.columns:
@@ -207,7 +198,10 @@ def incoming_shortwave_random_forest(df):
     return df
 
 
-def specific_humidity_exp_decay(df):
+def specific_humidity_exp_decay(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add the exponential decay humidity estimate to a dataframe
+    """
     x = np.load(f"{base_path}/models/q/exponential_decay/optimal_params.npy", allow_pickle=True)
     a, b, c = x[0], x[1], x[2]
 
@@ -218,7 +212,10 @@ def specific_humidity_exp_decay(df):
     return df
 
 
-def specific_humidity_nn(df):
+def specific_humidity_nn(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add the neural network humidity estimate to a dataframe
+    """
     def define_model(units, num_layers, activation, l2):
         model_layers = [
             layers.Dense(

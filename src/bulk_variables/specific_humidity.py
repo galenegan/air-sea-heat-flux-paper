@@ -17,6 +17,7 @@ params = {
 }
 plt.rcParams.update(params)
 
+
 def interpolate_gaps(values, limit=None):
     """
     Fill gaps using linear interpolation, optionally only fill gaps up to a
@@ -29,7 +30,7 @@ def interpolate_gaps(values, limit=None):
 
     if limit is not None:
         invalid = ~valid
-        for n in range(1, limit+1):
+        for n in range(1, limit + 1):
             invalid[:-n] &= invalid[n:]
         filled[invalid] = np.nan
 
@@ -61,8 +62,8 @@ mae_fit = mae(exp_fit, q_air - q_int)
 bias_fit = bias(exp_fit, q_air - q_int)
 # %%
 fig, (ax1, ax2) = plt.subplots(1, 2)
-ax1.plot(df["time"], q_air, 'o', markersize=3, color="#012749", label=r"ASIT $q_{\textrm{air}}$")
-ax1.plot(df["time"], q_int, 'o', markersize=3, alpha=0.1, color="#009d9a", label=r"Spotter Internal $q_{\textrm{int}}$")
+ax1.plot(df["time"], q_air, "o", markersize=3, color="#012749", label=r"ASIT $q_{\textrm{air}}$")
+ax1.plot(df["time"], q_int, "o", markersize=3, alpha=0.1, color="#009d9a", label=r"Spotter Internal $q_{\textrm{int}}$")
 leg = ax1.legend()
 ax1.set_ylabel("$q$ (g/kg)")
 ax1.set_title("(a)")
@@ -70,8 +71,14 @@ ax1.set_title("(a)")
 for lh in leg.legendHandles[1:]:
     lh.set_alpha(0.5)
 
-ax2.plot(df["time"],  q_air - q_int, 'o', markersize=3, color="#012749")
-ax2.plot(df["time"], exp_fit, linewidth=3, color="#9f1853", label=f"Exp Fit, MAE = {mae_fit:.2f} g/kg, Bias = {bias_fit:.2f} g/kg")
+ax2.plot(df["time"], q_air - q_int, "o", markersize=3, color="#012749")
+ax2.plot(
+    df["time"],
+    exp_fit,
+    linewidth=3,
+    color="#9f1853",
+    label=f"Exp Fit, MAE = {mae_fit:.2f} g/kg, Bias = {bias_fit:.2f} g/kg",
+)
 ax2.set_ylabel(r"$q_{\textrm{air}} - q_{\textrm{int}}$ (g/kg)")
 ax2.set_title("(b)")
 ax2.legend()
