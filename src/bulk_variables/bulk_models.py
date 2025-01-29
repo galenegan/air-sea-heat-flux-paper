@@ -98,7 +98,9 @@ def air_temperature_nn(df: pd.DataFrame) -> pd.DataFrame:
     X_norm = (X - norms["mean"]) / norms["std"]
 
     # Neural net predicts the residual
+    bad_indices = np.any(pd.isna(df[features + ["air_temperature_surface"]]), axis=1)
     df["estimated_air_temperature_nn"] = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
+    df.loc[bad_indices, "estimated_air_temperature_nn"] = np.nan
     return df
 
 
@@ -110,7 +112,7 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     if "estimated_air_temperature" not in df.columns:
         df = air_temperature_linear(df)
 
-    x = np.load(f"{base_path}/models/shortwave/box/optimal_params.npy", allow_pickle=True)
+    x = np.load(f"{base_path}/models/shortwave/box/optimal_params_revised.npy", allow_pickle=True)
     kappa_mdpe, length_scale, albedo_spot, weight_ta, weight_ti = x[0], x[1], x[2], x[3], x[4]
 
     # Some constants
@@ -151,7 +153,7 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     Re = u_surface * 0.407 / 1.48e-5
 
     # Turbulent formulation, flat plate
-    Nu = 0.037 * (Re ** (4 / 5))
+    Nu = 0.0296 * (Re ** (4 / 5))
     h_air = Nu * kappa_air / 0.407
 
     estimated_solar = (
@@ -172,7 +174,7 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def incoming_shortwave_random_forest(df: pd.DataFrame) -> pd.DataFrame:
+def incoming_shortwave_random_forest(df: pd.DataFrame, version="revised") -> pd.DataFrame:
     """
     Add the random forest shortwave estimate to a dataframe
     """
@@ -180,21 +182,36 @@ def incoming_shortwave_random_forest(df: pd.DataFrame) -> pd.DataFrame:
     if "box_model_solar" not in df.columns:
         df = incoming_shortwave_box_model(df)
 
-    model = joblib.load(f"{base_path}/models/shortwave/random_forest/model.pkl")
-    norms = np.load(f"{base_path}/models/shortwave/random_forest/norms.npy", allow_pickle=True).item()
+    model = joblib.load(f"{base_path}/models/shortwave/random_forest/{version}/model.pkl")
+    norms = np.load(f"{base_path}/models/shortwave/random_forest/{version}/norms.npy", allow_pickle=True).item()
 
-    features = [
-        "box_model_solar",
-        "delta_night_air_temp",
-        "solar_voltage",
-        "log_battery_power",
-        "sea_surface_temperature",
-    ]
+    if version == "original":
+        features = [
+            "box_model_solar",
+            "delta_night_air_temp",
+            "solar_voltage",
+            "log_battery_power",
+            "sea_surface_temperature",
+        ]
+        X = df.loc[:, features].values
+        X_norm = (X - norms["mean"]) / norms["std"]
+        shortwave_out = df["box_model_solar"].values - model.predict(X_norm).squeeze()
+        df["estimated_shortwave_rf"] = np.maximum(shortwave_out, 0)
+    elif version == "revised":
+        features = [
+            "box_model_solar",
+            "delta_night_air_temp",
+            "estimated_air_temperature",
+            "solar_voltage",
+            "battery_power",
+        ]
+        X = df.loc[:, features]
+        X_norm = (X - norms["mean"]) / norms["std"]
+        shortwave_out = model.predict(X_norm).squeeze()
+        bad_indices = np.any(pd.isna(df[features + ["solar_down"]]), axis=1)
+        df["estimated_shortwave_rf"] = shortwave_out
+        df.loc[bad_indices, "estimated_shortwave_rf"] = np.nan
 
-    X = df.loc[:, features].values
-    X_norm = (X - norms["mean"]) / norms["std"]
-    shortwave_out = df["box_model_solar"].values - model.predict(X_norm).squeeze()
-    df["estimated_shortwave_rf"] = np.maximum(shortwave_out, 0)
     return df
 
 
@@ -211,6 +228,28 @@ def specific_humidity_exp_decay(df: pd.DataFrame) -> pd.DataFrame:
     df["estimated_q_outer"] = estimated_q_outer
     return df
 
+def specific_humidity_linear(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add the linear specific humidity estimate and related variables to a dataframe
+    """
+    if "estimated_air_temperature" not in df.columns:
+        df = air_temperature_linear(df)
+
+    if "estimated_q_outer" not in df.columns:
+        df = specific_humidity_exp_decay(df)
+
+    df = df.sort_index()
+    X = np.vstack((df["estimated_air_temperature"].values, df["atmospheric_pressure"].values, df["dTdt_filt"].values)).T
+    pred_idx = ~np.isnan(X).any(axis=1)
+
+    # Loading the linear model
+    model = joblib.load(f"{base_path}/models/q/linear/model.pkl")
+    estimated_specific_humidity = np.zeros((X.shape[0],)) * np.nan
+    estimated_specific_humidity[pred_idx] = (
+        df["estimated_q_outer"].values[pred_idx] - model.predict(X[pred_idx, :]).squeeze()
+    )
+    df["estimated_specific_humidity"] = estimated_specific_humidity
+    return df
 
 def specific_humidity_nn(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -257,5 +296,7 @@ def specific_humidity_nn(df: pd.DataFrame) -> pd.DataFrame:
     X = df.loc[:, features].values
     X_norm = (X - norms["mean"]) / norms["std"]
     q_out = df["estimated_q_outer"].values - model.predict(X_norm).squeeze()
+    bad_indices = np.any(pd.isna(df[features + ["specific_humidity_surface"]]), axis=1)
     df["estimated_specific_humidity_nn"] = q_out
+    df.loc[bad_indices, "estimated_specific_humidity_nn"] = np.nan
     return df

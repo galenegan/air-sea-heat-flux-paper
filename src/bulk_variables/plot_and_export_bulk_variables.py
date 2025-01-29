@@ -22,12 +22,13 @@ params = {
 plt.rcParams.update(params)
 
 
-def mae(x, y):
-    return np.nanmean(np.abs(x - y))
+def mae(predicted, actual):
+    return np.nanmean(np.abs(predicted - actual))
 
-
-def bias(x, y):
-    return np.nanmean(x - y)
+def rmse(predicted, actual):
+    return np.sqrt(np.nanmean((predicted - actual)**2))
+def bias(predicted, actual):
+    return np.nanmean(predicted - actual)
 
 
 project_root = get_project_root()
@@ -41,7 +42,7 @@ train_idx, val_idx, test_idx = get_train_val_test(df)
 full_idx = train_idx.union(val_idx.union(test_idx))
 
 # %% Estimating the bulk variables
-df = incoming_shortwave_random_forest(df)
+df = incoming_shortwave_random_forest(df, version="revised")
 df = air_temperature_nn(df)
 df = specific_humidity_nn(df)
 
@@ -58,6 +59,9 @@ ground_truth_variable = "air_temperature_surface"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_score = mae(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_score = mae(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
+train_rmse = rmse(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
+eval_rmse = rmse(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
+test_rmse = rmse(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
 train_bias = bias(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_bias = bias(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_bias = bias(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
@@ -82,7 +86,7 @@ ax1.plot(
     markersize=4,
 )
 ax1.annotate(
-    f"Train: MAE = {train_score:.2f}" + r"$^\circ$C," + f" Bias = {train_bias:.2f}" + r"$^\circ$C",
+    f"MAE = {train_score:.2f}, RMSE = {train_rmse:.2f}, Bias = {train_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
 )
@@ -98,7 +102,7 @@ ax2.plot(
 )
 ax2.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax2.annotate(
-    f"Val: MAE = {eval_score:.2f}" + r"$^\circ$C," + f" Bias = {eval_bias:.2f}" + r"$^\circ$C",
+    f"MAE = {eval_score:.2f}, RMSE = {eval_rmse:.2f}, Bias = {eval_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
 )
@@ -113,7 +117,7 @@ ax3.plot(
 )
 ax3.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax3.annotate(
-    f"Test: MAE = {test_score:.2f}" + r"$^\circ$C," + f" Bias = {test_bias:.2f}" + r"$^\circ$C",
+    f"MAE = {test_score:.2f}, RMSE = {test_rmse:.2f}, Bias = {test_bias:.2f}" + r"$^\circ$C",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
 )
@@ -139,6 +143,9 @@ ground_truth_variable = "solar_down"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_score = mae(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_score = mae(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
+train_rmse = rmse(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
+eval_rmse = rmse(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
+test_rmse = rmse(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
 train_bias = bias(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_bias = bias(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_bias = bias(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
@@ -162,9 +169,10 @@ ax4.plot(
     markersize=4,
 )
 ax4.annotate(
-    f"Train: MAE = {train_score:.2f}" + r" W/m$^2$," + f" Bias = {train_bias:.2f}" + f" W/m$^2$",
+    f"MAE = {train_score:.2f}, RMSE = {train_rmse:.2f}, Bias = {train_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
+    fontsize=15
 )
 ax4.plot(one_train, one_train, "-", color="#9f1853", linewidth=3)
 
@@ -178,9 +186,10 @@ ax5.plot(
 )
 ax5.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax5.annotate(
-    f"Val: MAE = {eval_score:.2f}" + r" W/m$^2$," + f" Bias = {eval_bias:.2f}" + f" W/m$^2$",
+    f"MAE = {eval_score:.2f}, RMSE = {eval_rmse:.2f}, Bias = {eval_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
+    fontsize=15
 )
 
 ax6.plot(
@@ -193,9 +202,10 @@ ax6.plot(
 )
 ax6.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax6.annotate(
-    f"Test: MAE = {test_score:.2f}" + r" W/m$^2$," + f" Bias = {test_bias:.2f}" + f" W/m$^2$",
+    f"MAE = {test_score:.2f}, RMSE = {test_rmse:.2f}, Bias = {test_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
+    fontsize=15
 )
 
 ax4.set_title("(d)")
@@ -215,6 +225,9 @@ ground_truth_variable = "specific_humidity_surface"
 train_score = mae(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_score = mae(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_score = mae(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
+train_rmse = rmse(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
+eval_rmse = rmse(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
+test_rmse = rmse(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
 train_bias = bias(df.loc[train_idx, predicted_variable], df.loc[train_idx, ground_truth_variable])
 eval_bias = bias(df.loc[val_idx, predicted_variable], df.loc[val_idx, ground_truth_variable])
 test_bias = bias(df.loc[test_idx, predicted_variable], df.loc[test_idx, ground_truth_variable])
@@ -241,7 +254,7 @@ ax7.plot(
     markersize=4,
 )
 ax7.annotate(
-    f"Train: MAE = {train_score:.2f}" + " g/kg," + f" Bias = {train_bias:.2f}" + " g/kg",
+    f"MAE = {train_score:.2f}, RMSE = {train_rmse:.2f}, Bias = {train_bias:.2f}" + " g/kg",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
 )
@@ -257,7 +270,7 @@ ax8.plot(
 )
 ax8.plot(one_val, one_val, "-", color="#9f1853", linewidth=3)
 ax8.annotate(
-    f"Val: MAE = {eval_score:.2f}" + " g/kg," + f" Bias = {eval_bias:.2f}" + " g/kg",
+    f"MAE = {eval_score:.2f}, RMSE = {eval_rmse:.2f}, Bias = {eval_bias:.2f}" + " g/kg",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
 )
@@ -272,7 +285,7 @@ ax9.plot(
 )
 ax9.plot(one_test, one_test, "-", color="#9f1853", linewidth=3)
 ax9.annotate(
-    f"Test: MAE = {test_score:.2f}" + " g/kg," + f" Bias = {test_bias:.2f}" + " g/kg",
+    f"MAE = {test_score:.2f}, RMSE = {test_rmse:.2f}, Bias = {test_bias:.2f}" + " g/kg",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
 )
