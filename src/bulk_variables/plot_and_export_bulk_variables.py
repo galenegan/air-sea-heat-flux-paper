@@ -49,7 +49,7 @@ train_idx, val_idx, test_idx = get_train_val_test(df)
 full_idx = train_idx.union(val_idx.union(test_idx))
 
 # %% Estimating the bulk variables
-df = incoming_shortwave_random_forest(df, version="revised")
+df = incoming_shortwave_random_forest(df)
 df = air_temperature_nn(df)
 df = specific_humidity_nn(df)
 
