@@ -1,7 +1,8 @@
-# Air-sea Heat Flux Observations from a Spotter Buoy
+# Observing bulk meteorological parameters and air-sea heat fluxes with a Spotter buoy
 
-This repo contains all code necessary to reproduce the results presented in "Air-sea Heat Flux Observations from a
-Spotter Buoy," which has been submitted for publication by Galen Egan, Seth Zippel, and Pieter Smit.
+This repo contains all code necessary to reproduce the results presented in "Observing bulk meteorological parameters
+and air-sea heat fluxes with a Spotter buoy," which has been submitted for publication by Galen Egan, Seth Zippel, and
+Pieter Smit.
 
 ## Interpreter Setup
 
