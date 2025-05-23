@@ -18,6 +18,7 @@ params = {
 }
 plt.rcParams.update(params)
 
+
 def mae(predicted, actual):
     return np.nanmean(np.abs(predicted - actual))
 
@@ -28,8 +29,6 @@ def rmse(predicted, actual):
 
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
-
-
 
 
 def set_lims(ax):
@@ -98,16 +97,27 @@ file_dict = {
     "asit wind and q": "final_flux_dataset_asit_u_asit_q.csv",
 }
 
-dfout = pd.DataFrame(index=["mae_sensible", "rmse_sensible", "bias_sensible", "mae_latent", "rmse_latent", "bias_latent"])
+dfout = pd.DataFrame(
+    index=["mae_sensible", "rmse_sensible", "bias_sensible", "mae_latent", "rmse_latent", "bias_latent"]
+)
 for col_name, file_name in file_dict.items():
     df = pd.read_csv(f"{data_path}/{file_name}")
     df = df.loc[df["spot_id"] == "31085C"]
     mask = get_sensible_mask(df)
     # Sensible heat flux
     if col_name == "filtered":
-        mae_i = mae(df["sensible_heat_flux_spotter_coare"].values[mask], median_filter(df["sensible_heat_flux_dc"].values[mask], size=15))
-        rmse_i = rmse(df["sensible_heat_flux_spotter_coare"].values[mask], median_filter(df["sensible_heat_flux_dc"].values[mask], size=15))
-        bias_i = bias(df["sensible_heat_flux_spotter_coare"].values[mask], median_filter(df["sensible_heat_flux_dc"].values[mask], size=15))
+        mae_i = mae(
+            df["sensible_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
+        )
+        rmse_i = rmse(
+            df["sensible_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
+        )
+        bias_i = bias(
+            df["sensible_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
+        )
     else:
         mae_i = mae(df["sensible_heat_flux_spotter_coare"].values[mask], df["sensible_heat_flux_dc"].values[mask])
         rmse_i = rmse(df["sensible_heat_flux_spotter_coare"].values[mask], df["sensible_heat_flux_dc"].values[mask])
@@ -119,12 +129,21 @@ for col_name, file_name in file_dict.items():
     mask = get_latent_mask(df)
 
     if col_name == "filtered":
-        mae_i = mae(df["latent_heat_flux_spotter_coare"].values[mask], median_filter(df["latent_heat_flux_dc"].values[mask], size=15))
-        rmse_i = rmse(df["latent_heat_flux_spotter_coare"].values[mask], median_filter(df["latent_heat_flux_dc"].values[mask], size=15))
-        bias_i = bias(df["latent_heat_flux_spotter_coare"].values[mask], median_filter(df["latent_heat_flux_dc"].values[mask], size=15))
+        mae_i = mae(
+            df["latent_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
+        )
+        rmse_i = rmse(
+            df["latent_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
+        )
+        bias_i = bias(
+            df["latent_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
+        )
     else:
         mae_i = mae(df["latent_heat_flux_spotter_coare"].values[mask], df["latent_heat_flux_dc"].values[mask])
-        rmse_i = rmse( df["latent_heat_flux_spotter_coare"].values[mask], df["latent_heat_flux_dc"].values[mask])
+        rmse_i = rmse(df["latent_heat_flux_spotter_coare"].values[mask], df["latent_heat_flux_dc"].values[mask])
         bias_i = bias(df["latent_heat_flux_spotter_coare"].values[mask], df["latent_heat_flux_dc"].values[mask])
 
     dfout.loc[["mae_latent", "rmse_latent", "bias_latent"], col_name] = [mae_i, rmse_i, bias_i]

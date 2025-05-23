@@ -6,7 +6,7 @@ from src.bulk_variables.bulk_models import (
     air_temperature_linear,
     incoming_shortwave_box_model,
     specific_humidity_linear,
-    get_train_val_test
+    get_train_val_test,
 )
 
 params = {
@@ -26,8 +26,11 @@ plt.rcParams.update(params)
 def mae(predicted, actual):
     return np.nanmean(np.abs(predicted - actual))
 
+
 def rmse(predicted, actual):
-    return np.sqrt(np.nanmean((predicted - actual)**2))
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
+
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
 
@@ -60,20 +63,14 @@ ax1.plot(
     color="#012749",
     alpha=0.5,
 )
-ax1.plot(
-    one,
-    one,
-    "-",
-    color="#9f1853",
-    linewidth=3
-)
+ax1.plot(one, one, "-", color="#9f1853", linewidth=3)
 ax1.annotate(
     f"MAE = {mae_plot:.2f}, RMSE = {rmse_plot:.2f}, Bias = {bias_plot:.2f}" + r" $^\circ$C",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
-    fontsize=14
+    fontsize=14,
 )
-ax1.set_xlabel(r"Linear Regression $T_{\textrm{air}}$ $(^\circ C)$")
+ax1.set_xlabel(r"Linear Regression $\tilde{T}_{\textrm{air}}$ $(^\circ C)$")
 ax1.set_ylabel(r"ASIT $T_{\textrm{air}}$ $(^\circ C)$")
 ax1.set_xlim(-6, 32)
 ax1.set_ylim(-6, 32)
@@ -94,20 +91,14 @@ ax2.plot(
     color="#012749",
     alpha=0.5,
 )
-ax2.plot(
-    one,
-    one,
-    "-",
-    color="#9f1853",
-    linewidth=3
-)
+ax2.plot(one, one, "-", color="#9f1853", linewidth=3)
 ax2.annotate(
     f"MAE = {mae_plot:.2f}, RMSE = {rmse_plot:.2f}, Bias = {bias_plot:.2f}" + r" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
-    fontsize=14
+    fontsize=14,
 )
-ax2.set_xlabel(r"Box Model $Q_{SW,\textrm{down}}$ (W/m$^2$)")
+ax2.set_xlabel(r"Box Model $\tilde{Q}_{SW,\textrm{down}}$ (W/m$^2$)")
 ax2.set_ylabel(r"ASIT $Q_{SW,\textrm{down}}$ (W/m$^2$)")
 ax2.set_xlim(-100, 1250)
 ax2.set_ylim(-100, 1250)
@@ -127,20 +118,14 @@ ax3.plot(
     color="#012749",
     alpha=0.5,
 )
-ax3.plot(
-    one,
-    one,
-    "-",
-    color="#9f1853",
-    linewidth=3
-)
+ax3.plot(one, one, "-", color="#9f1853", linewidth=3)
 ax3.annotate(
     f"MAE = {mae_plot:.2f}, RMSE = {rmse_plot:.2f}, Bias = {bias_plot:.2f}" + " g/kg",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
-    fontsize=14
+    fontsize=14,
 )
-ax3.set_xlabel(r"Linear Model $q$ (g/kg)")
+ax3.set_xlabel(r"Linear Model $\tilde{q}$ (g/kg)")
 ax3.set_ylabel(r"ASIT $q$ (g/kg)")
 ax3.set_xlim(1, 21.34)
 ax3.set_ylim(1, 21.34)

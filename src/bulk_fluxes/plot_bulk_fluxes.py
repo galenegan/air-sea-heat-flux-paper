@@ -30,6 +30,7 @@ def rmse(predicted, actual):
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
 
+
 def set_lims(ax, scale=1.0):
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()

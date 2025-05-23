@@ -4,8 +4,10 @@ import pandas as pd
 from src.utils import get_project_root
 from src.bulk_variables.bulk_models import (
     air_temperature_linear,
+    get_train_val_test
 )
-np.random.seed(31)
+
+np.random.seed(41)
 
 params = {
     "axes.labelsize": 20,
@@ -24,8 +26,11 @@ plt.rcParams.update(params)
 def mae(predicted, actual):
     return np.nanmean(np.abs(predicted - actual))
 
+
 def rmse(predicted, actual):
-    return np.sqrt(np.nanmean((predicted - actual)**2))
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
+
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
 
@@ -34,7 +39,11 @@ project_root = get_project_root()
 df = pd.read_csv(f"{project_root}/data/training_dataset.csv")
 spot_ids_vented = ["31081C", "31084C", "31085C"]
 df = df.loc[df["spot_id"].isin(spot_ids_vented)]
+train_idx, val_idx, test_idx = get_train_val_test(df)
+df = df.loc[test_idx]
+df = df.reset_index(drop=True)
 df = air_temperature_linear(df)
+
 
 def incoming_shortwave_box_model(df: pd.DataFrame) -> np.array:
     """
@@ -102,7 +111,8 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> np.array:
 
     return estimated_solar
 
-#%% Error metrics
+
+# %% Error metrics
 rmse_tair = 1.14
 bias_tair = 0.09
 random_error_tair = np.random.normal(loc=bias_tair, scale=rmse_tair, size=len(df))
@@ -111,7 +121,7 @@ rmse_wind = 1.931
 bias_wind = 0.1366
 random_error_wind = np.random.normal(loc=bias_wind, scale=rmse_wind, size=len(df))
 
-#%% Running standard case
+# %% Running standard case
 df["air_temp_to_use"] = df["estimated_air_temperature"]
 df["U_10_to_use"] = df["U_10m_mean"]
 df["box_model_solar"] = incoming_shortwave_box_model(df)
@@ -130,73 +140,73 @@ df["residual_wind_perturbed"] = df["box_model_solar_wind_perturbed"] - df["solar
 
 # Both perturbed case
 df["air_temp_to_use"] = df["estimated_air_temperature"] + random_error_tair
-df["U_10_to_use"] = df["U_10m_mean"] + random_error_wind
+# df["U_10_to_use"] = df["U_10m_mean"] + random_error_wind
 df["box_model_solar_both_perturbed"] = incoming_shortwave_box_model(df)
 df["residual_both_perturbed"] = df["box_model_solar_both_perturbed"] - df["solar_down"]
 
 # %% Plotting
+bins = np.arange(-750, 751, 5)
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 12))
 
 bias = df["residual"].mean()
 mae = np.nanmean(df["residual"].abs())
 rmse = np.nanstd(df["residual"])
-ax1.hist(df["residual"], bins="auto", color="#012749")
+ax1.hist(df["residual"], bins=bins, color="#012749", density=True)
 ax1.set_title("(a)")
-ax1.set_ylabel("Counts")
+ax1.set_ylabel("Density")
 ax1.set_xlabel(r"Shortwave Residual (W/m$^2$)")
 ax1.set_yscale("log")
 ax1.annotate(
-    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f}" + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
+    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f} " + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
     xy=(0.01, 0.8),
     xycoords="axes fraction",
 )
-ax1.grid(axis="x")
+ax1.set_xlim(-750, 750)
 
 bias = df["residual_temp_perturbed"].mean()
 mae = np.nanmean(df["residual_temp_perturbed"].abs())
 rmse = np.nanstd(df["residual_temp_perturbed"])
-ax2.hist(df["residual_temp_perturbed"], bins="auto", color="#012749")
+ax2.hist(df["residual_temp_perturbed"], bins=bins, color="#012749", density=True)
 ax2.set_title("(b)")
 ax2.set_xlabel(r"Shortwave Residual with Temp Perturbed (W/m$^2$)")
-ax2.set_ylabel("Counts")
+ax2.set_ylabel("Density")
 ax2.annotate(
-    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f}" + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
+    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f} " + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
     xy=(0.01, 0.8),
     xycoords="axes fraction",
 )
-ax2.grid(axis="x")
 ax2.set_yscale("log")
+ax2.set_xlim(-750, 750)
 
 bias = df["residual_wind_perturbed"].mean()
 mae = np.nanmean(df["residual_wind_perturbed"].abs())
 rmse = np.nanstd(df["residual_wind_perturbed"])
-ax3.hist(df["residual_wind_perturbed"], bins="auto", color="#012749")
+ax3.hist(df["residual_wind_perturbed"], bins=bins, color="#012749", density=True)
 ax3.set_title("(c)")
 ax3.set_xlabel(r"Shortwave Residual with Wind Perturbed (W/m$^2$)")
-ax3.set_ylabel("Counts")
+ax3.set_ylabel("Density")
 ax3.annotate(
-    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f}" + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
+    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f} " + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
     xy=(0.01, 0.8),
     xycoords="axes fraction",
 )
-ax3.grid(axis="x")
+ax3.set_xlim(-750, 750)
 ax3.set_yscale("log")
 
 bias = df["residual_both_perturbed"].mean()
 mae = np.nanmean(df["residual_both_perturbed"].abs())
 rmse = np.nanstd(df["residual_both_perturbed"])
-ax4.hist(df["residual_both_perturbed"], bins="auto", color="#012749")
+ax4.hist(df["residual_both_perturbed"], bins=bins, color="#012749", density=True)
 ax4.set_title("(d)")
 ax4.set_xlabel(r"Shortwave Residual with Both Perturbed (W/m$^2$)")
-ax4.set_ylabel("Counts")
+ax4.set_ylabel("Density")
 ax4.annotate(
-    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f}" + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
+    f"MAE = {mae:.2f} " + r"W/m$^2$" + f"\nRMSE = {rmse:.2f} " + r"W/m$^2$" + f"\nBias = {bias:.2f} " + r"W/m$^2$",
     xy=(0.01, 0.8),
     xycoords="axes fraction",
 )
-ax4.grid(axis="x")
 ax4.set_yscale("log")
-
-
+ax4.set_xlim(-750, 750)
 fig.tight_layout(pad=0.5)
+plt.savefig(f"{project_root}/plots/solar_mc.png", dpi=300)
 plt.show()

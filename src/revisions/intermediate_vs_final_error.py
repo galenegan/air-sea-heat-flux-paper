@@ -25,8 +25,10 @@ plt.rcParams.update(params)
 def mae(predicted, actual):
     return np.nanmean(np.abs(predicted - actual))
 
+
 def rmse(predicted, actual):
-    return np.sqrt(np.nanmean((predicted - actual)**2))
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
 
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
@@ -34,15 +36,13 @@ def bias(predicted, actual):
 
 project_root = get_project_root()
 df_full = pd.read_csv(f"{project_root}/data/bulk_variable_dataset.csv")
+spot_ids_vented = ["31081C", "31084C", "31085C"]
+df_full = df_full.loc[df_full["spot_id"].isin(spot_ids_vented)]
 train_idx, val_idx, test_idx = get_train_val_test(df_full)
 
-#%% Training
+# %% Training
 df = df_full.loc[train_idx].reset_index(drop=True)
-indices = [
-    "air_temperature",
-    "shortwave",
-    "specific_humidity"
-]
+indices = ["air_temperature", "shortwave", "specific_humidity"]
 columns = [
     "int_mae",
     "int_rmse",
@@ -55,7 +55,7 @@ columns = [
     "delta_bias",
     "pct_mae",
     "pct_rmse",
-    "pct_bias"
+    "pct_bias",
 ]
 out = pd.DataFrame(index=indices, columns=columns)
 # Air temperature
@@ -72,10 +72,10 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 
 # Shortwave
 variable = "shortwave"
@@ -91,10 +91,10 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 # Specific Humidity
 variable = "specific_humidity"
 intermediate_estimate = "estimated_q_outer"
@@ -109,16 +109,16 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 
 out = out.drop(columns=["delta_mae", "delta_rmse", "delta_bias"])
 index_map = {
     "air_temperature": r"$T_{\text{air}}$",
     "shortwave": r"$Q_{\text{SW, down}}$",
-    "specific_humidity": r"$q_{\text{air}}$"
+    "specific_humidity": r"$q_{\text{air}}$",
 }
 column_map = {
     "int_mae": "Int. MAE",
@@ -129,7 +129,7 @@ column_map = {
     "final_bias": "Final Bias",
     "pct_mae": r"\% MAE",
     "pct_rmse": r"\% RMSE",
-    "pct_bias": r"\% Bias"
+    "pct_bias": r"\% Bias",
 }
 out = out.rename(index=index_map, columns=column_map)
 out = out.astype(float).round(decimals=2).astype(str)
@@ -138,13 +138,9 @@ print(out.to_latex())
 print(" " * 60)
 
 
-#%% Validation
+# %% Validation
 df = df_full.loc[val_idx].reset_index(drop=True)
-indices = [
-    "air_temperature",
-    "shortwave",
-    "specific_humidity"
-]
+indices = ["air_temperature", "shortwave", "specific_humidity"]
 columns = [
     "int_mae",
     "int_rmse",
@@ -157,7 +153,7 @@ columns = [
     "delta_bias",
     "pct_mae",
     "pct_rmse",
-    "pct_bias"
+    "pct_bias",
 ]
 out = pd.DataFrame(index=indices, columns=columns)
 # Air temperature
@@ -174,10 +170,10 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 
 # Shortwave
 variable = "shortwave"
@@ -193,10 +189,10 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 # Specific Humidity
 variable = "specific_humidity"
 intermediate_estimate = "estimated_q_outer"
@@ -211,16 +207,16 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 
 out = out.drop(columns=["delta_mae", "delta_rmse", "delta_bias"])
 index_map = {
     "air_temperature": r"$T_{\text{air}}$",
     "shortwave": r"$Q_{\text{SW, down}}$",
-    "specific_humidity": r"$q_{\text{air}}$"
+    "specific_humidity": r"$q_{\text{air}}$",
 }
 column_map = {
     "int_mae": "Int. MAE",
@@ -231,20 +227,16 @@ column_map = {
     "final_bias": "Final Bias",
     "pct_mae": r"\% MAE",
     "pct_rmse": r"\% RMSE",
-    "pct_bias": r"\% Bias"
+    "pct_bias": r"\% Bias",
 }
 out = out.rename(index=index_map, columns=column_map)
 out = out.astype(float).round(decimals=2).astype(str)
 print("Validation data table:")
 print(out.to_latex())
 print(" " * 60)
-#%% Test
+# %% Test
 df = df_full.loc[test_idx].reset_index(drop=True)
-indices = [
-    "air_temperature",
-    "shortwave",
-    "specific_humidity"
-]
+indices = ["air_temperature", "shortwave", "specific_humidity"]
 columns = [
     "int_mae",
     "int_rmse",
@@ -257,7 +249,7 @@ columns = [
     "delta_bias",
     "pct_mae",
     "pct_rmse",
-    "pct_bias"
+    "pct_bias",
 ]
 out = pd.DataFrame(index=indices, columns=columns)
 # Air temperature
@@ -274,10 +266,10 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 
 # Shortwave
 variable = "shortwave"
@@ -293,10 +285,10 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 # Specific Humidity
 variable = "specific_humidity"
 intermediate_estimate = "estimated_q_outer"
@@ -311,16 +303,16 @@ out.loc[variable, "final_rmse"] = rmse(df[final_estimate], df[ground_truth_varia
 out.loc[variable, "final_bias"] = bias(df[final_estimate], df[ground_truth_variable])
 out.loc[variable, "delta_mae"] = out.loc[variable, "int_mae"] - out.loc[variable, "final_mae"]
 out.loc[variable, "delta_rmse"] = out.loc[variable, "int_rmse"] - out.loc[variable, "final_rmse"]
-out.loc[variable, "delta_bias"] = out.loc[variable, "int_bias"] - out.loc[variable, "final_bias"]
-out.loc[variable, 'pct_mae'] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
-out.loc[variable, 'pct_rmse'] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
-out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / out.loc[variable, "int_bias"]
+out.loc[variable, "delta_bias"] = np.abs(out.loc[variable, "int_bias"]) - np.abs(out.loc[variable, "final_bias"])
+out.loc[variable, "pct_mae"] = 100 * out.loc[variable, "delta_mae"] / out.loc[variable, "int_mae"]
+out.loc[variable, "pct_rmse"] = 100 * out.loc[variable, "delta_rmse"] / out.loc[variable, "int_rmse"]
+out.loc[variable, "pct_bias"] = 100 * out.loc[variable, "delta_bias"] / np.abs(out.loc[variable, "int_bias"])
 
 out = out.drop(columns=["delta_mae", "delta_rmse", "delta_bias"])
 index_map = {
     "air_temperature": r"$T_{\text{air}}$",
     "shortwave": r"$Q_{\text{SW, down}}$",
-    "specific_humidity": r"$q_{\text{air}}$"
+    "specific_humidity": r"$q_{\text{air}}$",
 }
 column_map = {
     "int_mae": "Int. MAE",
@@ -331,7 +323,7 @@ column_map = {
     "final_bias": "Final Bias",
     "pct_mae": r"\% MAE",
     "pct_rmse": r"\% RMSE",
-    "pct_bias": r"\% Bias"
+    "pct_bias": r"\% Bias",
 }
 out = out.rename(index=index_map, columns=column_map)
 out = out.astype(float).round(decimals=2).astype(str)

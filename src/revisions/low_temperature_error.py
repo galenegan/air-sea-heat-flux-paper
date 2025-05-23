@@ -40,7 +40,7 @@ df = df.loc[((df["time"] > "2024-01-15") & (df["time"] < "2024-01-25"))]
 df = df.reset_index(drop=True)
 
 
-#%%
+# %%
 fig, ax = plt.subplots(figsize=(8, 6))
 sc = ax.scatter(df["air_temperature_surface"], df["sea_surface_temperature"], c=df["residual"], cmap="viridis")
 cb = plt.colorbar(sc, ax=ax)

@@ -25,8 +25,11 @@ plt.rcParams.update(params)
 def mae(predicted, actual):
     return np.nanmean(np.abs(predicted - actual))
 
+
 def rmse(predicted, actual):
-    return np.sqrt(np.nanmean((predicted - actual)**2))
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
+
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
 
@@ -172,7 +175,7 @@ ax4.annotate(
     f"MAE = {train_score:.2f}, RMSE = {train_rmse:.2f}, Bias = {train_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
-    fontsize=15
+    fontsize=15,
 )
 ax4.plot(one_train, one_train, "-", color="#9f1853", linewidth=3)
 
@@ -189,7 +192,7 @@ ax5.annotate(
     f"MAE = {eval_score:.2f}, RMSE = {eval_rmse:.2f}, Bias = {eval_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
-    fontsize=15
+    fontsize=15,
 )
 
 ax6.plot(
@@ -205,7 +208,7 @@ ax6.annotate(
     f"MAE = {test_score:.2f}, RMSE = {test_rmse:.2f}, Bias = {test_bias:.2f}" + f" W/m$^2$",
     xy=(0.02, 0.9),
     xycoords="axes fraction",
-    fontsize=15
+    fontsize=15,
 )
 
 ax4.set_title("(d)")

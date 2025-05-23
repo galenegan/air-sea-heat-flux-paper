@@ -228,6 +228,7 @@ def specific_humidity_exp_decay(df: pd.DataFrame) -> pd.DataFrame:
     df["estimated_q_outer"] = estimated_q_outer
     return df
 
+
 def specific_humidity_linear(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add the linear specific humidity estimate and related variables to a dataframe
@@ -251,10 +252,12 @@ def specific_humidity_linear(df: pd.DataFrame) -> pd.DataFrame:
     df["estimated_specific_humidity"] = estimated_specific_humidity
     return df
 
+
 def specific_humidity_nn(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add the neural network humidity estimate to a dataframe
     """
+
     def define_model(units, num_layers, activation, l2):
         model_layers = [
             layers.Dense(

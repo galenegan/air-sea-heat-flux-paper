@@ -6,7 +6,7 @@ from src.bulk_variables.bulk_models import (
     air_temperature_linear,
     incoming_shortwave_box_model,
     specific_humidity_exp_decay,
-    get_train_val_test
+    get_train_val_test,
 )
 from sklearn.linear_model import LinearRegression
 
@@ -27,8 +27,11 @@ plt.rcParams.update(params)
 def mae(predicted, actual):
     return np.nanmean(np.abs(predicted - actual))
 
+
 def rmse(predicted, actual):
-    return np.sqrt(np.nanmean((predicted - actual)**2))
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
+
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
 
@@ -44,7 +47,7 @@ df = specific_humidity_exp_decay(df)
 df["qres"] = df["estimated_q_outer"] - df["specific_humidity_surface"]
 df["delta_t"] = df["air_temperature"] - df["estimated_air_temperature"]
 
-#%% Training the model
+# %% Training the model
 dflr = df.dropna(subset=["estimated_air_temperature", "atmospheric_pressure", "dTdt_filt", "qres"])
 dflr = dflr.reset_index(drop=True)
 train, val, test = get_train_val_test(dflr)
@@ -53,7 +56,6 @@ X_train = dflr.loc[train.union(val), ["estimated_air_temperature", "atmospheric_
 X_test = dflr.loc[test, ["estimated_air_temperature", "atmospheric_pressure", "dTdt_filt"]]
 y_train = dflr.loc[train.union(val), "qres"]
 y_test = dflr.loc[test, "qres"]
-
 
 
 reg = LinearRegression().fit(X_train, y_train)
@@ -67,6 +69,9 @@ plt.show()
 
 print(mae(dflr["estimated_specific_humidity"], dflr["specific_humidity_surface"]))
 
-#%% Exporting the model
+# %% Exporting the model
 import joblib
-joblib.dump(reg, "/Users/ea-gegan/Documents/gitrepos/air-sea-heat-flux-paper/src/bulk_variables/models/q/linear/model.pkl")
+
+joblib.dump(
+    reg, "/Users/ea-gegan/Documents/gitrepos/air-sea-heat-flux-paper/src/bulk_variables/models/q/linear/model.pkl"
+)

@@ -6,7 +6,7 @@ from src.bulk_variables.bulk_models import (
     air_temperature_linear,
     incoming_shortwave_box_model,
     specific_humidity_exp_decay,
-    get_train_val_test
+    get_train_val_test,
 )
 
 params = {
@@ -26,8 +26,11 @@ plt.rcParams.update(params)
 def mae(predicted, actual):
     return np.nanmean(np.abs(predicted - actual))
 
+
 def rmse(predicted, actual):
-    return np.sqrt(np.nanmean((predicted - actual)**2))
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
+
 def bias(predicted, actual):
     return np.nanmean(predicted - actual)
 
@@ -46,7 +49,7 @@ df = specific_humidity_exp_decay(df)
 
 df["qres"] = df["estimated_q_outer"] - df["specific_humidity_surface"]
 df["time"] = pd.to_datetime(df["time"], utc=True)
-#%% Sandbox plots
+# %% Sandbox plots
 istart = 2000
 iend = 3000
 # time series
@@ -57,7 +60,7 @@ fig.autofmt_xdate()
 ax.legend()
 plt.show()
 
-#%% Scatter with qsw
+# %% Scatter with qsw
 fig, ax = plt.subplots(figsize=(8, 6))
 sc = ax.scatter(df["estimated_q_outer"], df["specific_humidity_surface"], c=df["delta_night_air_temp"], cmap="viridis")
 cb = plt.colorbar(sc, ax=ax)
@@ -67,31 +70,32 @@ cb.set_label(r"internal temp")
 fig.tight_layout(pad=0.5)
 plt.show()
 
-#%% Scatter with qsw
+# %% Scatter with qsw
 fig, ax = plt.subplots(figsize=(8, 6))
-sc = ax.scatter(df.loc[df["solar_voltage"] < 1, "estimated_q_outer"], df.loc[df["solar_voltage"] < 1, "specific_humidity_surface"])
+sc = ax.scatter(
+    df.loc[df["solar_voltage"] < 1, "estimated_q_outer"], df.loc[df["solar_voltage"] < 1, "specific_humidity_surface"]
+)
 ax.set_xlabel(r"Estimated q")
 ax.set_ylabel(r"Actual q")
 fig.tight_layout(pad=0.5)
 plt.show()
 
-#%% Big pairplot
+# %% Big pairplot
 import seaborn as sns
+
 df = df.loc[df["dTdt_filt"] < 0.0025]
 df["delta_t"] = df["air_temperature"] - df["estimated_air_temperature"]
-columns = [
-    "qres",
-    "estimated_air_temperature",
-    "atmospheric_pressure",
-    "delta_t"
-]
+columns = ["qres", "estimated_air_temperature", "atmospheric_pressure", "delta_t"]
 fig = plt.figure()
 sns.pairplot(data=df, vars=columns, diag_kind=None)
 plt.show()
 
-#%% linear regression
+# %% linear regression
 from sklearn.linear_model import LinearRegression
-dflr = df.dropna(subset=["estimated_air_temperature", "atmospheric_pressure", "delta_t", "qres", "significant_wave_height"])
+
+dflr = df.dropna(
+    subset=["estimated_air_temperature", "atmospheric_pressure", "delta_t", "qres", "significant_wave_height"]
+)
 X = dflr[["estimated_air_temperature", "atmospheric_pressure", "delta_t"]]
 y = dflr["qres"]
 

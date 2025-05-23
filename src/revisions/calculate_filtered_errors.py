@@ -85,7 +85,7 @@ data_path = f"./flux_data"
 file_dict = {
     "pure spotter": "final_flux_dataset.csv",
     "filtered inputs": "final_flux_dataset_filtered_inputs.csv",
-    "filtered inputs and dc": "final_flux_dataset_filtered_inputs.csv"
+    "filtered inputs and dc": "final_flux_dataset_filtered_inputs.csv",
 }
 
 dfout = pd.DataFrame(index=["mae_sensible", "bias_sensible", "mae_latent", "bias_latent"])
@@ -96,8 +96,14 @@ for col_name, file_name in file_dict.items():
     # Sensible heat flux
     mask = get_sensible_mask(df)
     if "and dc" in col_name:
-        mae_i = mae(median_filter(df["sensible_heat_flux_dc"].values[mask], size=15), df["sensible_heat_flux_spotter_coare"].values[mask])
-        bias_i = bias(median_filter(df["sensible_heat_flux_spotter_coare"].values[mask], size=15), df["sensible_heat_flux_dc"].values[mask])
+        mae_i = mae(
+            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
+            df["sensible_heat_flux_spotter_coare"].values[mask],
+        )
+        bias_i = bias(
+            median_filter(df["sensible_heat_flux_spotter_coare"].values[mask], size=15),
+            df["sensible_heat_flux_dc"].values[mask],
+        )
         dfout.loc[["mae_sensible", "bias_sensible"], col_name] = [mae_i, bias_i]
     else:
         mae_i = mae(df["sensible_heat_flux_dc"].values[mask], df["sensible_heat_flux_spotter_coare"].values[mask])
@@ -107,8 +113,14 @@ for col_name, file_name in file_dict.items():
     # Latent heat flux
     mask = get_latent_mask(df)
     if "and dc" in col_name:
-        mae_i = mae(median_filter(df["latent_heat_flux_dc"].values[mask], size=15), df["latent_heat_flux_spotter_coare"].values[mask])
-        bias_i = bias(median_filter(df["latent_heat_flux_spotter_coare"].values[mask], size=15), df["latent_heat_flux_dc"].values[mask])
+        mae_i = mae(
+            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
+            df["latent_heat_flux_spotter_coare"].values[mask],
+        )
+        bias_i = bias(
+            median_filter(df["latent_heat_flux_spotter_coare"].values[mask], size=15),
+            df["latent_heat_flux_dc"].values[mask],
+        )
         dfout.loc[["mae_latent", "bias_latent"], col_name] = [mae_i, bias_i]
     else:
         mae_i = mae(df["latent_heat_flux_dc"].values[mask], df["latent_heat_flux_spotter_coare"].values[mask])
