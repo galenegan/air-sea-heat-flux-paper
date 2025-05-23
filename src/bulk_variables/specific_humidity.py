@@ -1,7 +1,10 @@
+"""
+Generates Figure 5
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from src.coare3p5.meteo import qair
 from src.utils import get_project_root
 
 params = {
@@ -41,6 +44,10 @@ def mae(x, y):
     return np.nanmean(np.abs(x - y))
 
 
+def rmse(x, y):
+    return np.sqrt(np.nanmean((x - y) ** 2))
+
+
 def bias(x, y):
     return np.nanmean(x - y)
 
@@ -59,6 +66,7 @@ exp_fit = a * np.exp(b * df["days"].values) + c
 q_air = interpolate_gaps(df["specific_humidity_surface"].values, limit=10)
 q_int = interpolate_gaps(df["q_inner"].values, limit=10)
 mae_fit = mae(exp_fit, q_air - q_int)
+rmse_fit = rmse(exp_fit, q_air - q_int)
 bias_fit = bias(exp_fit, q_air - q_int)
 # %%
 fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -77,7 +85,7 @@ ax2.plot(
     exp_fit,
     linewidth=3,
     color="#9f1853",
-    label=f"Exp Fit, MAE = {mae_fit:.2f} g/kg, Bias = {bias_fit:.2f} g/kg",
+    label=f"Exp Fit, MAE = {mae_fit:.2f}, RMSE = {rmse_fit:.2f}, Bias = {bias_fit:.2f} g/kg",
 )
 ax2.set_ylabel(r"$q_{\textrm{air}} - q_{\textrm{int}}$ (g/kg)")
 ax2.set_title("(b)")
@@ -85,5 +93,5 @@ ax2.legend()
 fig.autofmt_xdate()
 fig.set_size_inches(14, 5)
 fig.tight_layout(pad=1)
-plt.savefig(f"{project_root}/plots/q.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/q.png", dpi=300)
 plt.show()

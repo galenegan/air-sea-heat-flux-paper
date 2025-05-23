@@ -98,6 +98,38 @@ def air_temperature_nn(df: pd.DataFrame) -> pd.DataFrame:
     X_norm = (X - norms["mean"]) / norms["std"]
 
     # Neural net predicts the residual
+    bad_indices = np.any(pd.isna(df[features + ["air_temperature_surface"]]), axis=1)
+    df["estimated_air_temperature_nn"] = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
+    df.loc[bad_indices, "estimated_air_temperature_nn"] = np.nan
+    return df
+
+
+def air_temperature_nn_full(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Not used in the paper, but this applies a neural network trained on the entire ASIT dataset to predict
+    air temperature
+    """
+
+    # Making sure we have the semi-analytical air temp
+    if "estimated_air_temperature" not in df.columns:
+        df = air_temperature_linear(df)
+
+    model = keras.models.load_model(f"{base_path}/models/air_temp/nn_full_dataset/t_air.keras")
+
+    norms = np.load(f"{base_path}/models/air_temp/nn_full_dataset/norms.npy", allow_pickle=True).item()
+
+    features = [
+        "estimated_air_temperature",
+        "air_temperature",
+        "solar_voltage",
+        "sea_surface_temperature",
+        "U_10m_mean",
+    ]
+
+    X = df[features].values
+    X_norm = (X - norms["mean"]) / norms["std"]
+
+    # Neural net predicts the residual
     df["estimated_air_temperature_nn"] = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
     return df
 
@@ -151,7 +183,7 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     Re = u_surface * 0.407 / 1.48e-5
 
     # Turbulent formulation, flat plate
-    Nu = 0.037 * (Re ** (4 / 5))
+    Nu = 0.0296 * (Re ** (4 / 5))
     h_air = Nu * kappa_air / 0.407
 
     estimated_solar = (
@@ -186,15 +218,17 @@ def incoming_shortwave_random_forest(df: pd.DataFrame) -> pd.DataFrame:
     features = [
         "box_model_solar",
         "delta_night_air_temp",
+        "estimated_air_temperature",
         "solar_voltage",
-        "log_battery_power",
-        "sea_surface_temperature",
+        "battery_power",
     ]
-
-    X = df.loc[:, features].values
+    X = df.loc[:, features]
     X_norm = (X - norms["mean"]) / norms["std"]
-    shortwave_out = df["box_model_solar"].values - model.predict(X_norm).squeeze()
-    df["estimated_shortwave_rf"] = np.maximum(shortwave_out, 0)
+    shortwave_out = model.predict(X_norm).squeeze()
+    bad_indices = np.any(pd.isna(df[features + ["solar_down"]]), axis=1)
+    df["estimated_shortwave_rf"] = shortwave_out
+    df.loc[bad_indices, "estimated_shortwave_rf"] = np.nan
+
     return df
 
 
@@ -212,10 +246,35 @@ def specific_humidity_exp_decay(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def specific_humidity_linear(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add the linear specific humidity estimate and related variables to a dataframe
+    """
+    if "estimated_air_temperature" not in df.columns:
+        df = air_temperature_linear(df)
+
+    if "estimated_q_outer" not in df.columns:
+        df = specific_humidity_exp_decay(df)
+
+    df = df.sort_index()
+    X = np.vstack((df["estimated_air_temperature"].values, df["atmospheric_pressure"].values, df["dTdt_filt"].values)).T
+    pred_idx = ~np.isnan(X).any(axis=1)
+
+    # Loading the linear model
+    model = joblib.load(f"{base_path}/models/q/linear/model.pkl")
+    estimated_specific_humidity = np.zeros((X.shape[0],)) * np.nan
+    estimated_specific_humidity[pred_idx] = (
+        df["estimated_q_outer"].values[pred_idx] - model.predict(X[pred_idx, :]).squeeze()
+    )
+    df["estimated_specific_humidity"] = estimated_specific_humidity
+    return df
+
+
 def specific_humidity_nn(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add the neural network humidity estimate to a dataframe
     """
+
     def define_model(units, num_layers, activation, l2):
         model_layers = [
             layers.Dense(
@@ -257,5 +316,7 @@ def specific_humidity_nn(df: pd.DataFrame) -> pd.DataFrame:
     X = df.loc[:, features].values
     X_norm = (X - norms["mean"]) / norms["std"]
     q_out = df["estimated_q_outer"].values - model.predict(X_norm).squeeze()
+    bad_indices = np.any(pd.isna(df[features + ["specific_humidity_surface"]]), axis=1)
     df["estimated_specific_humidity_nn"] = q_out
+    df.loc[bad_indices, "estimated_specific_humidity_nn"] = np.nan
     return df

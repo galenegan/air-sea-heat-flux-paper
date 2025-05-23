@@ -1,3 +1,7 @@
+"""
+Generates Figure 8
+"""
+
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
@@ -19,12 +23,16 @@ params = {
 plt.rcParams.update(params)
 
 
-def mae(x, y):
-    return np.nanmean(np.abs(x - y))
+def mae(predicted, actual):
+    return np.nanmean(np.abs(predicted - actual))
 
 
-def bias(x, y):
-    return np.nanmean(x - y)
+def rmse(predicted, actual):
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
+
+def bias(predicted, actual):
+    return np.nanmean(predicted - actual)
 
 
 def set_lims(ax, scale=1.0):
@@ -60,7 +68,6 @@ mask = (
     & (df["rain_rate"].values < 1)
     & (df["epoch"].values < pd.Timestamp("2024-01-01T00:00:00Z").timestamp())
 )
-
 
 # %% Setting up the plot
 fig = plt.figure(constrained_layout=True)
@@ -99,6 +106,7 @@ ax1.plot(
     linewidth=3,
     label=(
         f"MAE = {mae(df['sensible_heat_flux_dc'][mask], df['sensible_heat_flux_asit_coare'][mask]):.2f} W/m$^2$\n"
+        + f"RMSE = {rmse(df['sensible_heat_flux_dc'][mask], df['sensible_heat_flux_asit_coare'][mask]):.2f} W/m$^2$\n"
         + f"Bias = {np.nanmean(df['sensible_heat_flux_asit_coare'][mask] - df['sensible_heat_flux_dc'][mask]):.2f} W/m$^2$"
     ),
 )
@@ -124,6 +132,7 @@ ax2.plot(
     linewidth=3,
     label=(
         f"MAE = {mae(df['sensible_heat_flux_dc'][mask], df['sensible_heat_flux_spotter_coare'][mask]):.2f} W/m$^2$\n"
+        + f"RMSE = {rmse(df['sensible_heat_flux_dc'][mask], df['sensible_heat_flux_spotter_coare'][mask]):.2f} W/m$^2$\n"
         + f"Bias = {np.nanmean(df['sensible_heat_flux_spotter_coare'][mask] - df['sensible_heat_flux_dc'][mask]):.2f} W/m$^2$"
     ),
 )
@@ -153,16 +162,16 @@ ax32.plot(
 ax31.plot(
     df["time"].values[mask],
     df["sensible_heat_flux_asit_coare"].values[mask],
-    color="#6929c4",
-    alpha=0.8,
+    color="#9029c4",
+    alpha=1.0,
     linewidth=2.5,
     label="ASIT Bulk",
 )
 ax32.plot(
     df["time"].values[mask],
     df["sensible_heat_flux_asit_coare"].values[mask],
-    color="#6929c4",
-    alpha=0.8,
+    color="#9029c4",
+    alpha=1.0,
     linewidth=2.5,
     label="ASIT Bulk",
 )
@@ -254,6 +263,7 @@ ax4.plot(
     linewidth=3,
     label=(
         f"MAE = {mae(df['latent_heat_flux_dc'][mask], df['latent_heat_flux_asit_coare'][mask]):.2f} W/m$^2$\n"
+        + f"RMSE = {rmse(df['latent_heat_flux_dc'][mask], df['latent_heat_flux_asit_coare'][mask]):.2f} W/m$^2$\n"
         + f"Bias = {np.nanmean(df['latent_heat_flux_asit_coare'][mask] - df['latent_heat_flux_dc'][mask]):.2f} W/m$^2$"
     ),
 )
@@ -279,6 +289,7 @@ ax5.plot(
     linewidth=3,
     label=(
         f"MAE = {mae(df['latent_heat_flux_dc'][mask], df['latent_heat_flux_spotter_coare'][mask]):.2f} W/m$^2$\n"
+        + f"RMSE = {rmse(df['latent_heat_flux_dc'][mask], df['latent_heat_flux_spotter_coare'][mask]):.2f} W/m$^2$\n"
         + f"Bias = {np.nanmean(df['latent_heat_flux_spotter_coare'][mask] - df['latent_heat_flux_dc'][mask]):.2f} W/m$^2$"
     ),
 )
@@ -299,8 +310,8 @@ ax61.plot(
 ax61.plot(
     df["time"].values[mask],
     df["latent_heat_flux_asit_coare"].values[mask],
-    color="#6929c4",
-    alpha=0.8,
+    color="#9029c4",
+    alpha=1.0,
     linewidth=2.5,
     label="ASIT Bulk",
 )
@@ -325,8 +336,8 @@ ax62.plot(
 ax62.plot(
     df["time"].values[mask],
     df["latent_heat_flux_asit_coare"].values[mask],
-    color="#6929c4",
-    alpha=0.8,
+    color="#9029c4",
+    alpha=1.0,
     linewidth=2.5,
     label="ASIT Bulk",
 )
@@ -363,7 +374,7 @@ ax62.plot((-d, +d / 10), (1 - d, 1 + d), **kwargs)
 ax62.plot((-d, +d / 10), (-d, +d), **kwargs)
 
 
-ax61.set_ylabel(r"Sensible Heat Flux (W/m$^2$)")
+ax61.set_ylabel(r"Latent Heat Flux (W/m$^2$)")
 ax62.legend()
 plt.setp(ax61.get_xticklabels(), rotation=30, ha="right")
 plt.setp(ax62.get_xticklabels(), rotation=30, ha="right")
@@ -376,5 +387,5 @@ ax62.annotate("(f)", xy=(0.2, 1.05), xycoords="axes fraction")
 
 fig.set_size_inches(10, 16)
 fig.tight_layout(pad=1)
-plt.savefig(f"{project_root}/plots/bulk_fluxes.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/bulk_fluxes.png", dpi=300)
 plt.show()

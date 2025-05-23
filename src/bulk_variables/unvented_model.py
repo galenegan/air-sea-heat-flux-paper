@@ -1,3 +1,7 @@
+"""
+Generates Figure 10b
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -70,6 +74,7 @@ df["estimated_air_temperature"] = df["air_temperature"].values - model.predict(X
 # df_vented.to_csv(f"{data_path}/specific_humidity_training_dataset_vented.csv", index=False)
 # %% Plotting
 mae_plot = np.nanmean(np.abs(df["estimated_air_temperature"].values - df["air_temperature_surface"].values))
+rmse_plot = np.sqrt(np.nanmean((df["estimated_air_temperature"].values - df["air_temperature_surface"].values) ** 2))
 bias_plot = np.nanmean(df["estimated_air_temperature"].values - df["air_temperature_surface"].values)
 one = np.linspace(df["air_temperature_surface"].min(), df["air_temperature_surface"].max(), 100)
 
@@ -87,10 +92,10 @@ ax1.plot(
     "-",
     color="#9f1853",
     linewidth=3,
-    label=f"MAE = {mae_plot:.2f} " + r"$^\circ$C" + f", Bias = {bias_plot:.2f} " + r"$^\circ$C",
+    label=f"MAE = {mae_plot:.2f}, RMSE = {rmse_plot:.2f}, Bias = {bias_plot:.2f} " + r"$^\circ$C",
 )
 ax1.legend()
-ax1.set_xlabel(r"Linear Regression $T_{\textrm{air}}$ $(^\circ C)$")
+ax1.set_xlabel(r"Linear Regression $\tilde{T}_{\textrm{air}}$ $(^\circ C)$")
 ax1.set_ylabel(r"ASIT $T_{\textrm{air}}$ $(^\circ C)$")
 ax1.set_xlim(-6, 32)
 ax1.set_ylim(-6, 32)
@@ -98,10 +103,5 @@ ax1.set_xticks(np.arange(-5, 31, 5))
 ax1.set_yticks(np.arange(-5, 31, 5))
 fig.set_size_inches(6, 5)
 fig.tight_layout(pad=0.5)
-plt.savefig(f"{project_root}/plots/unvented_tair.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/unvented_tair.png", dpi=300)
 plt.show()
-
-# %% Saving the model
-# import joblib
-# model_path = "/Users/ea-gegan/Documents/gitrepos/air-sea-heat-flux-paper/src/bulk_variables/models/air_temp/linear"
-# joblib.dump(model, f"{model_path}/model.pkl")
