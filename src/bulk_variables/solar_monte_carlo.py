@@ -51,7 +51,7 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> np.array:
     Add the box model shortwave radiation estimate to a dataframe
     """
 
-    x = np.load(f"{project_root}/src/bulk_variables/models/shortwave/box/optimal_params_revised.npy", allow_pickle=True)
+    x = np.load(f"{project_root}/src/bulk_variables/models/shortwave/box/optimal_params.npy", allow_pickle=True)
     kappa_mdpe, length_scale, albedo_spot, weight_ta, weight_ti = x[0], x[1], x[2], x[3], x[4]
 
     # Some constants
