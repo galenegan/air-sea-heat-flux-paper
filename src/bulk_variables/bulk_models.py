@@ -142,7 +142,7 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     if "estimated_air_temperature" not in df.columns:
         df = air_temperature_linear(df)
 
-    x = np.load(f"{base_path}/models/shortwave/box/optimal_params_revised.npy", allow_pickle=True)
+    x = np.load(f"{base_path}/models/shortwave/box/optimal_params.npy", allow_pickle=True)
     kappa_mdpe, length_scale, albedo_spot, weight_ta, weight_ti = x[0], x[1], x[2], x[3], x[4]
 
     # Some constants
@@ -204,7 +204,7 @@ def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def incoming_shortwave_random_forest(df: pd.DataFrame, version="revised") -> pd.DataFrame:
+def incoming_shortwave_random_forest(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add the random forest shortwave estimate to a dataframe
     """
@@ -212,35 +212,22 @@ def incoming_shortwave_random_forest(df: pd.DataFrame, version="revised") -> pd.
     if "box_model_solar" not in df.columns:
         df = incoming_shortwave_box_model(df)
 
-    model = joblib.load(f"{base_path}/models/shortwave/random_forest/{version}/model.pkl")
-    norms = np.load(f"{base_path}/models/shortwave/random_forest/{version}/norms.npy", allow_pickle=True).item()
+    model = joblib.load(f"{base_path}/models/shortwave/random_forest/model.pkl")
+    norms = np.load(f"{base_path}/models/shortwave/random_forest/norms.npy", allow_pickle=True).item()
 
-    if version == "original":
-        features = [
-            "box_model_solar",
-            "delta_night_air_temp",
-            "solar_voltage",
-            "log_battery_power",
-            "sea_surface_temperature",
-        ]
-        X = df.loc[:, features].values
-        X_norm = (X - norms["mean"]) / norms["std"]
-        shortwave_out = df["box_model_solar"].values - model.predict(X_norm).squeeze()
-        df["estimated_shortwave_rf"] = np.maximum(shortwave_out, 0)
-    elif version == "revised":
-        features = [
-            "box_model_solar",
-            "delta_night_air_temp",
-            "estimated_air_temperature",
-            "solar_voltage",
-            "battery_power",
-        ]
-        X = df.loc[:, features]
-        X_norm = (X - norms["mean"]) / norms["std"]
-        shortwave_out = model.predict(X_norm).squeeze()
-        bad_indices = np.any(pd.isna(df[features + ["solar_down"]]), axis=1)
-        df["estimated_shortwave_rf"] = shortwave_out
-        df.loc[bad_indices, "estimated_shortwave_rf"] = np.nan
+    features = [
+        "box_model_solar",
+        "delta_night_air_temp",
+        "estimated_air_temperature",
+        "solar_voltage",
+        "battery_power",
+    ]
+    X = df.loc[:, features]
+    X_norm = (X - norms["mean"]) / norms["std"]
+    shortwave_out = model.predict(X_norm).squeeze()
+    bad_indices = np.any(pd.isna(df[features + ["solar_down"]]), axis=1)
+    df["estimated_shortwave_rf"] = shortwave_out
+    df.loc[bad_indices, "estimated_shortwave_rf"] = np.nan
 
     return df
 
