@@ -103,6 +103,36 @@ def air_temperature_nn(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[bad_indices, "estimated_air_temperature_nn"] = np.nan
     return df
 
+def air_temperature_nn_full(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Not used in the paper, but this applies a neural network trained on the entire ASIT dataset to predict
+    air temperature
+    """
+
+    # Making sure we have the semi-analytical air temp
+    if "estimated_air_temperature" not in df.columns:
+        df = air_temperature_linear(df)
+
+
+    model = keras.models.load_model(f"{base_path}/models/air_temp/nn_full_dataset/t_air.keras")
+
+    norms = np.load(f"{base_path}/models/air_temp/nn_full_dataset/norms.npy", allow_pickle=True).item()
+
+    features = [
+        "estimated_air_temperature",
+        "air_temperature",
+        "solar_voltage",
+        "sea_surface_temperature",
+        "U_10m_mean",
+    ]
+
+    X = df[features].values
+    X_norm = (X - norms["mean"]) / norms["std"]
+
+    # Neural net predicts the residual
+    df["estimated_air_temperature_nn"] = df["estimated_air_temperature"] - model.predict(X_norm).squeeze()
+    return df
+
 
 def incoming_shortwave_box_model(df: pd.DataFrame) -> pd.DataFrame:
     """

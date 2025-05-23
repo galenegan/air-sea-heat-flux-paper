@@ -1,3 +1,6 @@
+"""
+Generates Figure 9
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -208,5 +211,5 @@ ax4.annotate(
 ax4.set_yscale("log")
 ax4.set_xlim(-750, 750)
 fig.tight_layout(pad=0.5)
-plt.savefig(f"{project_root}/plots/solar_mc.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/solar_mc.png", dpi=300)
 plt.show()

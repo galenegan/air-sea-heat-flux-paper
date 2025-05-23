@@ -1,3 +1,6 @@
+"""
+Generates Figure 3b, 4b
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -135,5 +138,5 @@ ax3.set_yticks(np.arange(5, 21, 5))
 fig.set_size_inches(17, 5)
 fig.tight_layout(pad=0.5)
 plt.rcParams.update(params)
-plt.savefig(f"{project_root}/plots/intermediate_bulk_variables.png", dpi=600)
+# plt.savefig(f"{project_root}/plots/intermediate_bulk_variables.png", dpi=600)
 plt.show()

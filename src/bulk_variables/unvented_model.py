@@ -1,3 +1,6 @@
+"""
+Generates Figure 10b
+"""
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -99,5 +102,5 @@ ax1.set_xticks(np.arange(-5, 31, 5))
 ax1.set_yticks(np.arange(-5, 31, 5))
 fig.set_size_inches(6, 5)
 fig.tight_layout(pad=0.5)
-plt.savefig(f"{project_root}/plots/unvented_tair.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/unvented_tair.png", dpi=300)
 plt.show()

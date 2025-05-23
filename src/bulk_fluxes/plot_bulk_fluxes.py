@@ -1,3 +1,6 @@
+"""
+Generates Figure 8
+"""
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
@@ -383,5 +386,5 @@ ax62.annotate("(f)", xy=(0.2, 1.05), xycoords="axes fraction")
 
 fig.set_size_inches(10, 16)
 fig.tight_layout(pad=1)
-plt.savefig(f"{project_root}/plots/bulk_fluxes.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/bulk_fluxes.png", dpi=300)
 plt.show()

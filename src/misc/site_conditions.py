@@ -1,3 +1,6 @@
+"""
+Generates Figure 2
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -73,5 +76,5 @@ for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
 fig.set_size_inches(18, 18)
 fig.autofmt_xdate()
 plt.rcParams.update(params)
-plt.savefig(f"{project_root}/plots/site_conditions.png", dpi=300, bbox_inches="tight")
+# plt.savefig(f"{project_root}/plots/site_conditions.png", dpi=300, bbox_inches="tight")
 plt.show()

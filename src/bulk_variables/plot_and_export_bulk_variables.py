@@ -1,3 +1,6 @@
+"""
+Generates Figure 7
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -306,5 +309,5 @@ for ax in [ax7, ax8, ax9]:
 
 fig.set_size_inches(19, 15)
 fig.tight_layout(pad=0.5)
-plt.savefig(f"{project_root}/plots/bulk_variables.png", dpi=300)
+# plt.savefig(f"{project_root}/plots/bulk_variables.png", dpi=300)
 plt.show()

@@ -1,3 +1,6 @@
+"""
+Generates Table A5
+"""
 import matplotlib.pyplot as plt
 from scipy.ndimage import median_filter
 import numpy as np
@@ -50,8 +53,8 @@ def get_sensible_mask(df):
     asit_relative_residual = np.abs(df["sensible_heat_flux_dc"].values / df["sensible_heat_flux_asit_coare"].values)
 
     mask = (
-        (df["sensible_heat_flux_dc"].values > -300)
-        & (df["sensible_heat_flux_dc"].values < 0)
+        (df["sensible_heat_flux_dc"].values > 0)
+        & (df["sensible_heat_flux_dc"].values < 300)
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)
@@ -70,8 +73,8 @@ def get_latent_mask(df):
     asit_relative_residual = np.abs(df["latent_heat_flux_dc"].values / df["latent_heat_flux_asit_coare"].values)
 
     mask = (
-        (df["latent_heat_flux_dc"].values > -300)
-        & (df["latent_heat_flux_dc"].values < 0)
+        (df["latent_heat_flux_dc"].values > 0)
+        & (df["latent_heat_flux_dc"].values < 500)
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)

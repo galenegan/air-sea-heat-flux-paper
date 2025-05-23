@@ -1,7 +1,9 @@
+"""
+Generates Figure 5
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from src.coare3p5.meteo import qair
 from src.utils import get_project_root
 
 params = {

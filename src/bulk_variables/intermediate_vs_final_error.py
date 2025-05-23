@@ -1,12 +1,12 @@
+"""
+Generates Tables A1 - A3
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from src.utils import get_project_root
 from src.bulk_variables.bulk_models import (
     get_train_val_test,
-    incoming_shortwave_random_forest,
-    air_temperature_nn,
-    specific_humidity_nn,
 )
 
 params = {

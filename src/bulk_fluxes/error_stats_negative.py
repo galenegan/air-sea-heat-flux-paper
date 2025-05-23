@@ -1,3 +1,6 @@
+"""
+Generates Table A4
+"""
 import matplotlib.pyplot as plt
 from scipy.ndimage import median_filter
 import numpy as np
@@ -19,12 +22,16 @@ params = {
 plt.rcParams.update(params)
 
 
-def mae(x, y):
-    return np.nanmean(np.abs(x - y))
+def mae(predicted, actual):
+    return np.nanmean(np.abs(predicted - actual))
 
 
-def bias(x, y):
-    return np.nanmean(x - y)
+def rmse(predicted, actual):
+    return np.sqrt(np.nanmean((predicted - actual) ** 2))
+
+
+def bias(predicted, actual):
+    return np.nanmean(predicted - actual)
 
 
 def set_lims(ax):
@@ -47,7 +54,7 @@ def get_sensible_mask(df):
 
     mask = (
         (df["sensible_heat_flux_dc"].values > -300)
-        & (df["sensible_heat_flux_dc"].values < 300)
+        & (df["sensible_heat_flux_dc"].values < 0)
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)
@@ -67,7 +74,7 @@ def get_latent_mask(df):
 
     mask = (
         (df["latent_heat_flux_dc"].values > -300)
-        & (df["latent_heat_flux_dc"].values < 500)
+        & (df["latent_heat_flux_dc"].values < 0)
         & (dflux < gradient_cutoff)
         & (asit_residual < asit_residual_cutoff)
         & (asit_relative_residual < 5)
@@ -80,52 +87,68 @@ def get_latent_mask(df):
 
 # %%
 project_root = get_project_root()
-data_path = f"./flux_data"
+data_path = f"{project_root}/data"
 
 file_dict = {
     "pure spotter": "final_flux_dataset.csv",
-    "filtered inputs": "final_flux_dataset_filtered_inputs.csv",
-    "filtered inputs and dc": "final_flux_dataset_filtered_inputs.csv",
+    "filtered": "final_flux_dataset_filtered_inputs.csv",
+    "asit wind": "final_flux_dataset_asit_u.csv",
+    "asit t": "final_flux_dataset_asit_t.csv",
+    "asit q": "final_flux_dataset_asit_q.csv",
+    "asit t and q": "final_flux_dataset_asit_q_asit_t.csv",
+    "asit wind and t": "final_flux_dataset_asit_u_asit_t.csv",
+    "asit wind and q": "final_flux_dataset_asit_u_asit_q.csv",
 }
 
-dfout = pd.DataFrame(index=["mae_sensible", "bias_sensible", "mae_latent", "bias_latent"])
+dfout = pd.DataFrame(
+    index=["mae_sensible", "rmse_sensible", "bias_sensible", "mae_latent", "rmse_latent", "bias_latent"]
+)
 for col_name, file_name in file_dict.items():
     df = pd.read_csv(f"{data_path}/{file_name}")
     df = df.loc[df["spot_id"] == "31085C"]
-
-    # Sensible heat flux
     mask = get_sensible_mask(df)
-    if "and dc" in col_name:
+    # Sensible heat flux
+    if col_name == "filtered":
         mae_i = mae(
-            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
             df["sensible_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
+        )
+        rmse_i = rmse(
+            df["sensible_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
         )
         bias_i = bias(
-            median_filter(df["sensible_heat_flux_spotter_coare"].values[mask], size=15),
-            df["sensible_heat_flux_dc"].values[mask],
+            df["sensible_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["sensible_heat_flux_dc"].values[mask], size=15),
         )
-        dfout.loc[["mae_sensible", "bias_sensible"], col_name] = [mae_i, bias_i]
     else:
-        mae_i = mae(df["sensible_heat_flux_dc"].values[mask], df["sensible_heat_flux_spotter_coare"].values[mask])
+        mae_i = mae(df["sensible_heat_flux_spotter_coare"].values[mask], df["sensible_heat_flux_dc"].values[mask])
+        rmse_i = rmse(df["sensible_heat_flux_spotter_coare"].values[mask], df["sensible_heat_flux_dc"].values[mask])
         bias_i = bias(df["sensible_heat_flux_spotter_coare"].values[mask], df["sensible_heat_flux_dc"].values[mask])
-        dfout.loc[["mae_sensible", "bias_sensible"], col_name] = [mae_i, bias_i]
+
+    dfout.loc[["mae_sensible", "rmse_sensible", "bias_sensible"], col_name] = [mae_i, rmse_i, bias_i]
 
     # Latent heat flux
     mask = get_latent_mask(df)
-    if "and dc" in col_name:
+
+    if col_name == "filtered":
         mae_i = mae(
-            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
             df["latent_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
+        )
+        rmse_i = rmse(
+            df["latent_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
         )
         bias_i = bias(
-            median_filter(df["latent_heat_flux_spotter_coare"].values[mask], size=15),
-            df["latent_heat_flux_dc"].values[mask],
+            df["latent_heat_flux_spotter_coare"].values[mask],
+            median_filter(df["latent_heat_flux_dc"].values[mask], size=15),
         )
-        dfout.loc[["mae_latent", "bias_latent"], col_name] = [mae_i, bias_i]
     else:
-        mae_i = mae(df["latent_heat_flux_dc"].values[mask], df["latent_heat_flux_spotter_coare"].values[mask])
+        mae_i = mae(df["latent_heat_flux_spotter_coare"].values[mask], df["latent_heat_flux_dc"].values[mask])
+        rmse_i = rmse(df["latent_heat_flux_spotter_coare"].values[mask], df["latent_heat_flux_dc"].values[mask])
         bias_i = bias(df["latent_heat_flux_spotter_coare"].values[mask], df["latent_heat_flux_dc"].values[mask])
-        dfout.loc[["mae_latent", "bias_latent"], col_name] = [mae_i, bias_i]
 
+    dfout.loc[["mae_latent", "rmse_latent", "bias_latent"], col_name] = [mae_i, rmse_i, bias_i]
 
 print(dfout.astype(float).round(2).astype(str).to_latex())
