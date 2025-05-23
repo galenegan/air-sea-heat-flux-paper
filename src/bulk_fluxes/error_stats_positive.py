@@ -1,6 +1,7 @@
 """
 Generates Table A5
 """
+
 import matplotlib.pyplot as plt
 from scipy.ndimage import median_filter
 import numpy as np

@@ -1,14 +1,12 @@
 """
 Generates Figure 9
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from src.utils import get_project_root
-from src.bulk_variables.bulk_models import (
-    air_temperature_linear,
-    get_train_val_test
-)
+from src.bulk_variables.bulk_models import air_temperature_linear, get_train_val_test
 
 np.random.seed(41)
 

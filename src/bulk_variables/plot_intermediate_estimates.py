@@ -1,6 +1,7 @@
 """
 Generates Figure 3b, 4b
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

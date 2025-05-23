@@ -103,6 +103,7 @@ def air_temperature_nn(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[bad_indices, "estimated_air_temperature_nn"] = np.nan
     return df
 
+
 def air_temperature_nn_full(df: pd.DataFrame) -> pd.DataFrame:
     """
     Not used in the paper, but this applies a neural network trained on the entire ASIT dataset to predict
@@ -112,7 +113,6 @@ def air_temperature_nn_full(df: pd.DataFrame) -> pd.DataFrame:
     # Making sure we have the semi-analytical air temp
     if "estimated_air_temperature" not in df.columns:
         df = air_temperature_linear(df)
-
 
     model = keras.models.load_model(f"{base_path}/models/air_temp/nn_full_dataset/t_air.keras")
 

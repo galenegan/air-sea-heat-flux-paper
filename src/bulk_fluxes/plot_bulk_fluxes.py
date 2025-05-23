@@ -1,6 +1,7 @@
 """
 Generates Figure 8
 """
+
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
