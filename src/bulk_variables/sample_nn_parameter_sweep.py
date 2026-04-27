@@ -59,7 +59,7 @@ def define_model(units, num_layers, activation, lr, l2):
             kernel_regularizer=regularizers.L2(l2=l2),
             kernel_initializer=keras.initializers.HeNormal(),
         )
-    ] * num_layers
+    for _ in range(num_layers)]
     model_layers += [layers.Dense(1)]
     model = keras.Sequential(model_layers)
     model.compile(loss="mse", optimizer=Adam(learning_rate=lr))
